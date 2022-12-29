@@ -1,23 +1,23 @@
 cmake_minimum_required(VERSION 3.16.0)
 
-project(Tutorial)
+project(libriccore)
 
 # Which mode to compile in
 option(LOCAL "Pick the ESP32 or DESKTOP (default)" ON)
 
-add_executable(Tutorial src/main.cpp include/impl/unix/thread.cpp)
+add_executable(libriccore src/main.cpp include/impl/unix/thread.cpp)
 if (LOCAL)
     message(STATUS "Compiling to run locally")
 
     # Compiler options
-    target_include_directories(Tutorial PRIVATE "./include/" "./include/impl/unix/")
-    target_compile_features(Tutorial PRIVATE cxx_std_17)
-    target_compile_options(Tutorial PRIVATE -Wall -Wextra -Wpedantic)
+    target_include_directories(libriccore PRIVATE "./include/" "./include/impl/unix/")
+    target_compile_features(libriccore PRIVATE cxx_std_17)
+    target_compile_options(libriccore PRIVATE -Wall -Wextra -Wpedantic)
 
     # Add pthreads
     set(THREADS_PREFER_PTHREAD_FLAG ON)
     find_package(Threads REQUIRED)
-    target_link_libraries(Tutorial PRIVATE Threads::Threads)
+    target_link_libraries(libriccore PRIVATE Threads::Threads)
 
 
     
