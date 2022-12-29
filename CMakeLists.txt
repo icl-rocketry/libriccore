@@ -9,7 +9,7 @@ option(LOCAL "Pick the ESP32 or DESKTOP (default)" ON)
 if (LOCAL)
     message(STATUS "Compiling to run locally")
 
-    add_executable(libriccore src/main.cpp include/impl/unix/thread.cpp)
+    add_executable(libriccore src/main.cpp include/impl/unix/thread.cpp include/impl/unix/fs.cpp)
 
     # Compiler options
     target_include_directories(libriccore PRIVATE "./include/" "./include/impl/unix/")
