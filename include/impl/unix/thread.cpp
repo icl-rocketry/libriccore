@@ -23,3 +23,13 @@ void Lock::acquire() {
 void Lock::release() {
     lock.unlock();
 }
+
+template <typename T>
+void Channel<T>::send(T item) {
+    channel.send(item);
+}
+
+template <typename T>
+void Channel<T>::receive(T& dest) {
+    channel.receive(dest);
+}

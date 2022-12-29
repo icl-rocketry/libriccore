@@ -44,3 +44,13 @@ public:
 private:
     Lock& l;
 };
+
+// A thread safe queue
+template <typename T>
+class Channel {
+public:
+    void send(T item);
+    void receive(T& dest);
+private:
+    config::ChannelType<T> channel;
+};
