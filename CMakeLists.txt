@@ -5,9 +5,11 @@ project(libriccore)
 # Which mode to compile in
 option(LOCAL "Pick the ESP32 or DESKTOP (default)" ON)
 
-add_executable(libriccore src/main.cpp include/impl/unix/thread.cpp)
+
 if (LOCAL)
     message(STATUS "Compiling to run locally")
+
+    add_executable(libriccore src/main.cpp include/impl/unix/thread.cpp)
 
     # Compiler options
     target_include_directories(libriccore PRIVATE "./include/" "./include/impl/unix/")
@@ -18,10 +20,10 @@ if (LOCAL)
     set(THREADS_PREFER_PTHREAD_FLAG ON)
     find_package(Threads REQUIRED)
     target_link_libraries(libriccore PRIVATE Threads::Threads)
-
-
     
-elseif (PLATFORM STREQUAL ESP32)
+else()
+    message(STATUS "TODO implement me")
+
     include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 endif()
 
