@@ -1,5 +1,6 @@
 #include <iostream>
 #include <headers/thread.h>
+#include <headers/fs.h>
 
 int fib(int n, int a, int b) {
     if (n == 0) {
@@ -14,7 +15,16 @@ int fib(int n) {
 
 void thread2(void* args) {
     Lock* l = (Lock*) args;
-    std::cout << fib(32) << std::endl;
+    int x = fib(32);
+    std::cout << x << std::endl;
+
+    FS::mkdir("./tmp/");
+    File f("./tmp/test.txt", FILE_MODE::WRITE);
+
+    std::string str = std::to_string(x);
+    f.write(str.c_str(), str.length() + 1);
+    f.close();
+
     l->release(); 
 }
 
