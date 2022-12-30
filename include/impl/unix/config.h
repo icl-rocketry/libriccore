@@ -1,14 +1,12 @@
 #pragma once
 #include <thread>
 #include <mutex>
-#include <fstream>
 #include <queue>
 
 // This file is used to specify base types for general headers
 namespace config {
     using ThreadHandleType = std::thread;
     using LockType = std::mutex;
-    using FileType = std::fstream;
 
     // We don't have a thread safe queue in STL apparently
     // Cba with fine grained locking so here we go
