@@ -1,4 +1,5 @@
 #include "store_base.h"
+#include <iostream>
 
 void WrappedFile::append(const char* data, size_t size, bool* done) {
     AppendRequest req{data, done, size};
@@ -8,19 +9,21 @@ void WrappedFile::append(const char* data, size_t size, bool* done) {
 void StoreBase::append(WrappedFile& file, AppendRequest r) {
     intptr_t idx = (intptr_t) (&file);
     queues.at(idx).send(r);
-    remaining_work.up(); //Must have sequential consistency (guarantee that the up happens after the channel send)
+    has_work.up(); //Must have sequential consistency (guarantee that the up happens after the channel send)
 }
 
 void StoreBase::flush_task(void* args) {
     AppendRequest req;
     
     while (true) {
+        has_work.down();
+        if (done) break;
+        
         for (auto& [idx, queue] : queues) {
             WrappedFile* file = (WrappedFile*) idx;
             bool pending_flush = false;
             
             while (!queue.empty()) {
-                remaining_work.down();
                 queue.receive(req);
                 
                 {
@@ -37,5 +40,6 @@ void StoreBase::flush_task(void* args) {
                 file->file_flush();
             }
         }
+        std::cout << "looping" << std::endl;
     }
 }

@@ -61,6 +61,11 @@ class StoreBase {
 public:
     StoreBase(Lock& device_lock) : device_lock(device_lock), t((void (*)(void* args)) &StoreBase::flush_task, (void*) this) {}
 
+    ~StoreBase() {
+        done = true;
+        has_work.up(); // Just incase the other thread is sleeping
+    }
+
     bool ls(std::vector<directory_element_t> &directory_structure) {
         return ls("/", directory_structure);
     }
@@ -74,12 +79,12 @@ public:
 
     Lock& device_lock;
 
-    void flush_task(void*);
 protected:
     std::unordered_map<intptr_t, Channel<AppendRequest>> queues;
 
 private:
-
+    void flush_task(void*);
     Thread t;
-    Semaphore remaining_work;
+    Semaphore has_work;
+    bool done;
 };
