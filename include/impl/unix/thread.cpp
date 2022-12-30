@@ -37,3 +37,7 @@ void Semaphore::up() {
 void Semaphore::down() {
     sema.down();
 }
+
+bool Semaphore::get() {
+    return sema.get();
+}

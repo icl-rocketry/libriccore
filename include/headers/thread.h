@@ -64,10 +64,12 @@ private:
     config::ChannelType<T> channel;
 };
 
+// This is a binary semaphore
 class Semaphore {
 public:
     void up();
     void down();
+    bool get();
 private:
     config::SemaType sema;
 };

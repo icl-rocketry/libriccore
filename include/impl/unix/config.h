@@ -9,20 +9,24 @@ namespace config {
     using ThreadHandleType = std::thread;
     using LockType = std::mutex;
     
-    // Can replace this with a counting_semaphore in cpp20
+    // Can replace this with a binary_semaphore in cpp20
     class SemaType {
     public:
         void up() {
-            counter++;
+            counter = true;
         }
         void down() {
-            while (counter == 0) {
+            while (!counter) {
                 std::this_thread::yield(); // Do something else;
             }
-            counter--;
+            counter = false;
+        }
+
+        bool get() {
+            return counter.load();
         }
     private:
-        std::atomic_int32_t counter;
+        std::atomic_bool counter;
     };
 
     // We don't have a thread safe queue in STL apparently
