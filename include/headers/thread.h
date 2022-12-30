@@ -49,9 +49,17 @@ private:
 template <typename T>
 class Channel {
 public:
-    void send(T item);
-    void receive(T& dest);
-    bool empty();
+    void send(T item) {
+        channel.send(item);
+    }
+    
+    void receive(T& dest) {
+        channel.receive(dest);
+    }
+
+    bool empty() {
+        return channel.empty();
+    }
 private:
     config::ChannelType<T> channel;
 };
