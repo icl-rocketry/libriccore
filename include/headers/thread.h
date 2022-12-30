@@ -54,3 +54,13 @@ public:
 private:
     config::ChannelType<T> channel;
 };
+
+class Semaphore {
+public:
+    void up();
+    void down();
+private:
+    config::SemaType sema;
+};
+
+void delay(uint32_t ms);

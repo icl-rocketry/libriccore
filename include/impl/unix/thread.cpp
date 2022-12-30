@@ -1,6 +1,7 @@
 #include <headers/thread.h>
 
 #include <thread>
+#include <chrono>
 #include <mutex>
 #include <memory>
 
@@ -32,4 +33,16 @@ void Channel<T>::send(T item) {
 template <typename T>
 void Channel<T>::receive(T& dest) {
     channel.receive(dest);
+}
+
+void delay(uint32_t ms) {
+    std::this_thread::sleep_for(std::chrono::milliseconds(ms));
+}
+
+void Semaphore::up() {
+    sema.up();
+}
+
+void Semaphore::down() {
+    sema.down();
 }
