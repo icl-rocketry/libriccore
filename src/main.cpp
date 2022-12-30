@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <filesystem>
 #include <utility>
 #include <memory>
 #include <headers/thread.h>
@@ -23,8 +24,6 @@ void thread2(void* args) {
     std::cout << x << std::endl;
     l->release(); 
 }
-
-// class UnixStore;
 
 class UnixWrappedFile : public WrappedFile {
 public:
@@ -79,40 +78,63 @@ public:
     }
 
     bool ls(std::string path, std::vector<directory_element_t> &directory_structure) {
+        if (!std::filesystem::exists(path)) return false;
+
+        for (const auto& entry : std::filesystem::directory_iterator(path)) {
+            FILE_TYPE f_type = FILE_TYPE::FILE;
+            if (entry.is_directory()) {
+                f_type = FILE_TYPE::DIRECTORY;
+            }
+
+            directory_structure.push_back(
+                {
+                    entry.path().filename(),
+                    static_cast<uint32_t>(entry.file_size()),
+                    f_type
+                }
+            );
+        }
         return true;
     }
     bool mkdir(std::string path) {
-        return true;
+        return std::filesystem::create_directory(path);
     }
 
     // Removes a file or an empty directory
     bool remove(std::string path) {
-        return true;
+        return std::filesystem::remove(path);
     }
 };
 
 
 int main() {
     Lock l;
-    // l.acquire();
-
-    // Thread t(&thread2, (void*) &l);
-
-    // l.acquire(); // Wait for thread 2 to complete
-
     UnixStore s(l);
     
+    if (s.mkdir("./tmp/")) {
+        std::cout << "Created tmp dir" << std::endl;
+    }
+
+    std::vector<directory_element_t> files;
+    s.ls("./tmp/", files);
+    
+    std::cout << "Found files:" << std::endl;
+    for (auto& file : files) {
+        std::cout << file.name << std::endl;
+    }
+
+    std::cout << std::endl;
+
     auto file = s.open("./tmp/asdf.txt", FILE_MODE::WRITE);
 
-    const char* str = "hello world\n";
+    std::string str = "hello world\n";
     bool done;
 
-    file->append(str, 12, &done);
+    file->append(str.c_str(), str.size(), &done);
 
     while (!done) {
         std::cout << "waiting" << std::endl;
     }
-
 
     std::cout << "Done" << std::endl;
     return 0;
