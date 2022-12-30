@@ -35,6 +35,11 @@ void Channel<T>::receive(T& dest) {
     channel.receive(dest);
 }
 
+template <typename T>
+bool Channel<T>::empty() {
+    return channel.empty();
+}
+
 void delay(uint32_t ms) {
     std::this_thread::sleep_for(std::chrono::milliseconds(ms));
 }

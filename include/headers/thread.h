@@ -51,6 +51,7 @@ class Channel {
 public:
     void send(T item);
     void receive(T& dest);
+    bool empty();
 private:
     config::ChannelType<T> channel;
 };

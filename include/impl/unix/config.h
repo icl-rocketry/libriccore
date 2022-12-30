@@ -39,6 +39,10 @@ namespace config {
             dest = std::move(vec.front());
             vec.pop();
         }
+        bool empty() {
+            auto l = std::scoped_lock(lock);
+            return vec.empty();
+        }
     
     private:
         std::mutex lock;
