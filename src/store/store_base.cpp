@@ -17,8 +17,6 @@ void StoreBase::flush_task(void* args) {
     
     while (true) {
         has_work.down();
-        if (done) break;
-        
         for (auto& [idx, queue] : queues) {
             WrappedFile* file = (WrappedFile*) idx;
             bool pending_flush = false;
@@ -40,6 +38,6 @@ void StoreBase::flush_task(void* args) {
                 file->file_flush();
             }
         }
-        std::cout << "looping" << std::endl;
+        if (done) break;
     }
 }
