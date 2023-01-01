@@ -7,7 +7,7 @@ add_compile_options(-g)
 add_subdirectory(include)
 add_subdirectory(src)
 
-add_executable(libriccore src/main.cpp)
+add_executable(libriccore test/main.cpp)
 target_compile_features(libriccore PRIVATE cxx_std_17)
 
 target_link_libraries(libriccore hal source)
