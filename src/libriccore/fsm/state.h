@@ -12,7 +12,8 @@ class State
 
   public:
 
-    State()
+    State(RicCoreTypes::stateID_t ID):
+    stateID(ID)
     {
       // time_entered_state = millis();
         // _sm->systemstatus.newFlag(_curr_stateID,"state entered");
@@ -36,7 +37,8 @@ class State
      };
 
   protected:
-
+    RicCoreTypes::stateID_t stateID;
+    
     uint64_t time_entered_state;
     uint64_t time_exited_state;
     uint64_t time_duration_state;
