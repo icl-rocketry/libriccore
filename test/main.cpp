@@ -7,24 +7,6 @@
 #include "store/store_base.h"
 #include <exception>
 
-int fib(int n, int a, int b) {
-    if (n == 0) {
-        return a;
-    }
-    return fib(n - 1, a + b, a);
-}
-
-int fib(int n) {
-    return fib(n, 0, 1);
-}
-
-void thread2(void* args) {
-    Lock* l = (Lock*) args;
-    int x = fib(32);
-    std::cout << x << std::endl;
-    l->release(); 
-}
-
 class UnixWrappedFile : public WrappedFile {
 public:
     UnixWrappedFile(std::string path, FILE_MODE mode, StoreBase& store) : WrappedFile(mode, store) {
@@ -42,11 +24,11 @@ public:
         file = std::fstream(path, f_mode);
     }
 
-    void read(char* dest, size_t size) {
+    void read(std::vector<char>& dest) {
         if (mode == FILE_MODE::WRITE) {
             throw std::runtime_error("Cannot read from a writeonly file");
         }
-        file.read(dest, size);
+        file.read(dest.data(), dest.size());
     }
     
     void close() {
@@ -56,8 +38,8 @@ public:
 private:
     std::fstream file;
 
-    virtual void file_write(const char* data, size_t size) {
-        file.write(data, size);
+    virtual void file_write(const std::vector<char>& data) {
+        file.write(data.data(), data.size());
     }
     virtual void file_flush() {
         file.flush();
@@ -70,7 +52,7 @@ public:
 
     std::unique_ptr<WrappedFile> open(std::string path, FILE_MODE mode) {
         auto file = std::make_unique<UnixWrappedFile>(path, mode, *this);
-        intptr_t idx = (intptr_t) (file.get());
+        intptr_t idx = reinterpret_cast<intptr_t>(file.get());
         queues.emplace(std::piecewise_construct,
                        std::forward_as_tuple(idx),
                        std::forward_as_tuple());
@@ -128,9 +110,10 @@ int main() {
     auto file = s.open("./tmp/asdf.txt", FILE_MODE::WRITE);
 
     std::string str = "hello world\n";
+    std::vector<char> vec(str.begin(), str.end());
     bool done;
 
-    file->append(str.c_str(), str.size(), &done);
+    file->append(vec, &done);
 
     while (!done) {
         std::cout << "waiting" << std::endl;

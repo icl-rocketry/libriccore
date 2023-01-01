@@ -27,9 +27,8 @@ struct directory_element_t{
 };
 
 struct AppendRequest {
-    const char* data;
+    const std::vector<char>* data; //Must be nullable
     bool* done;
-    size_t size;
 };
 
 class StoreBase;
@@ -38,9 +37,9 @@ public:
     WrappedFile(FILE_MODE mode, StoreBase& store) : mode(mode), store(store) {}
 
     // Send a request to the underlying store to store this
-    void append(const char* data, size_t size, bool* done);
+    void append(const std::vector<char>& data, bool* done);
 
-    virtual void read(char* dest, size_t size) = 0;
+    virtual void read(std::vector<char>& dest) = 0;
     virtual void close() = 0; // Should this be done automatically on delete?
 
 protected:
@@ -50,7 +49,7 @@ private:
     StoreBase& store;
 
     //Write/Flush to the underlying file type
-    virtual void file_write(const char* data, size_t size) = 0;
+    virtual void file_write(const std::vector<char>& data) = 0;
     virtual void file_flush() = 0;
 
 friend StoreBase;
