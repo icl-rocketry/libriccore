@@ -59,7 +59,7 @@ friend StoreBase;
 
 class StoreBase {
 public:
-    StoreBase(Lock& device_lock) : device_lock(device_lock), t((void (*)(void* args)) &StoreBase::flush_task, (void*) this) {}
+    StoreBase(Lock& device_lock) : device_lock(device_lock), t((void (*)(void* args)) &StoreBase::flush_task, (void*) this), done(false) {}
 
     ~StoreBase() {
         done = true;
