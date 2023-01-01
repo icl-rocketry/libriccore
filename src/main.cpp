@@ -4,7 +4,7 @@
 #include <utility>
 #include <memory>
 #include <headers/thread.h>
-#include "store/store_base.h"
+#include <libriccore/store/store_base.h>
 #include <exception>
 
 int fib(int n, int a, int b) {

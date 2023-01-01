@@ -4,7 +4,7 @@ project(source)
 
 message(STATUS "Compiling to run locally")
 
-file(GLOB SRC "*/*.*")
+file(GLOB SRC "*/*.*" "*/*/*.*")
 add_library(source ${SRC})
 
 target_compile_features(source PRIVATE cxx_std_17)
