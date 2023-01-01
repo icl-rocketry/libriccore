@@ -44,9 +44,9 @@ public:
 
 protected:
     FILE_MODE mode;
+    StoreBase& store;
 
 private:
-    StoreBase& store;
 
     //Write/Flush to the underlying file type
     virtual void file_write(const std::vector<char>& data) = 0;
@@ -70,6 +70,10 @@ public:
     }
 
     void append(WrappedFile& file, AppendRequest r);
+
+    Lock& get_lock() {
+        return device_lock;
+    }
 
     virtual std::unique_ptr<WrappedFile> open(std::string path, FILE_MODE mode) = 0;
     virtual bool ls(std::string path, std::vector<directory_element_t> &directory_structure) = 0;

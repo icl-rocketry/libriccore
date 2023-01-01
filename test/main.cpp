@@ -28,10 +28,12 @@ public:
         if (mode == FILE_MODE::WRITE) {
             throw std::runtime_error("Cannot read from a writeonly file");
         }
+        ScopedLock sl(store.get_lock());
         file.read(dest.data(), dest.size());
     }
     
     void close() {
+        ScopedLock sl(store.get_lock());
         file.close();
     }
 
@@ -51,6 +53,7 @@ public:
     UnixStore(Lock& device_lock) : StoreBase(device_lock) {}
 
     std::unique_ptr<WrappedFile> open(std::string path, FILE_MODE mode) {
+        ScopedLock sl(device_lock);
         auto file = std::make_unique<UnixWrappedFile>(path, mode, *this);
         intptr_t idx = reinterpret_cast<intptr_t>(file.get());
         queues.emplace(std::piecewise_construct,
@@ -60,6 +63,7 @@ public:
     }
 
     bool ls(std::string path, std::vector<directory_element_t> &directory_structure) {
+        ScopedLock sl(device_lock);
         if (!std::filesystem::exists(path)) return false;
 
         for (const auto& entry : std::filesystem::directory_iterator(path)) {
@@ -79,11 +83,13 @@ public:
         return true;
     }
     bool mkdir(std::string path) {
+        ScopedLock sl(device_lock);
         return std::filesystem::create_directory(path);
     }
 
     // Removes a file or an empty directory
     bool remove(std::string path) {
+        ScopedLock sl(device_lock);
         return std::filesystem::remove(path);
     }
 };
