@@ -37,8 +37,8 @@ class State
      };
 
   protected:
-    RicCoreTypes::stateID_t stateID;
-    
+    const RicCoreTypes::stateID_t stateID;
+
     uint64_t time_entered_state;
     uint64_t time_exited_state;
     uint64_t time_duration_state;
