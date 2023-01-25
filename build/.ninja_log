@@ -1,0 +1,17 @@
+# ninja log v5
+6	318	1674649970673633334	CMakeFiles/libriccore.dir/src/main.cpp.o	10c6df03c03d2a7a
+317	343	1674649970701559000	include/libhal.a	1e91bdf8a5c29dc8
+6	317	1674649970672708602	include/CMakeFiles/hal.dir/impl/unix/thread.cpp.o	95dba6b8782a0c6e
+6	317	1674649970672812938	src/CMakeFiles/source.dir/main.cpp.o	19470085fdbd54a8
+317	342	1674649970701553000	src/libsource.a	82482a471cc84a1d
+343	382	1674649970740734997	libriccore	b69e169b4c4abce7
+6	260	1674649978940745112	include/CMakeFiles/hal.dir/impl/unix/thread.cpp.o	ac074c41e9ddfd63
+6	262	1674649978942639452	src/CMakeFiles/source.dir/main.cpp.o	9657ca3896ef0adc
+6	269	1674649978949881266	CMakeFiles/libriccore.dir/src/main.cpp.o	53b0a361585bc3ce
+262	287	1674649978970999000	src/libsource.a	82482a471cc84a1d
+260	287	1674649978971190000	include/libhal.a	1e91bdf8a5c29dc8
+287	326	1674649979009372689	libriccore	b69e169b4c4abce7
+5	293	1674650558862324236	src/CMakeFiles/source.dir/main.cpp.o	9657ca3896ef0adc
+4	295	1674650558865610364	CMakeFiles/libriccore.dir/src/main.cpp.o	53b0a361585bc3ce
+293	322	1674650558895484000	src/libsource.a	82482a471cc84a1d
+322	367	1674650558938891354	libriccore	b69e169b4c4abce7

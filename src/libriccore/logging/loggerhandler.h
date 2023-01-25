@@ -36,13 +36,8 @@ class LoggerHandler{
         friend class ILoggerHandler;
         friend class RicCoreLogging;
         
-        /**
-         * @brief Configuration constexpr tuple. Intellisense seems to have issues realising that
-         *  a constexpr constructor is infact a constant expression, so if u see some red squiggles about
-         * it, it is a lie.
-         * 
-         */
-        static constexpr auto config{logger_list};
+        
+        const decltype(logger_list) config = logger_list;
 
         /**
          * @brief Get the Instance Reference

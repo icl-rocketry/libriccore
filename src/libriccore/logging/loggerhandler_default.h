@@ -7,4 +7,4 @@ enum class LOGGER
     SYS
 };
 
-constexpr auto logger_list = std::make_tuple(CoutLogger());
+const inline auto logger_list = std::make_tuple(CoutLogger("SYS_LOG"));
