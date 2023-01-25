@@ -1,5 +1,5 @@
 /**
- * @file defaultsystemflags.h
+ * @file systemflags_default.h
  * @author kiran de silva
  * @brief Default system flags which should always exist in a user defined system flag enum.
  * NOTE the values used in this enum were taken from Ricardo-OS, however these values can be changed if 
@@ -15,7 +15,7 @@
 #pragma once
 #include <cstdint>
 
-enum class DEFAULT_SYSTEM_FLAGS:uint32_t{
+enum class SYSTEM_FLAGS:uint32_t{
     DEBUG = (1 << 7),
     ERROR_SPI = (1 << 8),
     ERROR_I2C = (1 << 9),
