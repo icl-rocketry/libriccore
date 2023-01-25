@@ -30,7 +30,18 @@ class LoggerHandler{
         LoggerHandler(LoggerHandler const&) = delete;
         void operator=(LoggerHandler const&)  = delete;
 
-    
+        /**
+         * @brief Returns logger objects inside the logger handler as its actual type. This allows
+         *  function paramter deduction later.
+         * 
+         * @tparam NAME 
+         * @return constexpr auto 
+         */
+        template<LOGGER NAME>
+        constexpr auto retrieve_logger(){
+            return std::get<static_cast<int>(NAME)>(config);
+        }; 
+
     private:
         // Interface class friendships
         friend class ILoggerHandler;
@@ -48,26 +59,11 @@ class LoggerHandler{
             static LoggerHandler lg;
             return lg;
             };
-
-
-        /**
-         * @brief Returns logger objects inside the logger handler as its actual type. This allows
-         *  function paramter deduction later.
-         * 
-         * @tparam NAME 
-         * @return constexpr auto 
-         */
-        template<LOGGER NAME>
-        constexpr auto retrieve_logger(){
-            return std::get<static_cast<int>(NAME)>(config);
-        }; 
+        
 
         LoggerHandler(){};
         ~LoggerHandler(){};
         
-        
-
-
 
 };
 

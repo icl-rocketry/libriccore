@@ -5,6 +5,9 @@ message(STATUS "compiling main")
 
 add_compile_options(-g)
 add_compile_options(-O0)
+add_compile_options(-Wall)
+add_compile_options(-Wpedantic)
+
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/include)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/src)

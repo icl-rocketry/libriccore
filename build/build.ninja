@@ -51,7 +51,7 @@ build cmake_object_order_depends_target_libriccore: phony || cmake_object_order_
 
 build CMakeFiles/libriccore.dir/src/main.cpp.o: CXX_COMPILER__libriccore_Debug /Users/kiran/Documents/Projects/ICLR/libriccore/src/main.cpp || cmake_object_order_depends_target_libriccore
   DEP_FILE = CMakeFiles/libriccore.dir/src/main.cpp.o.d
-  FLAGS = -g -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX13.0.sdk -g -O0 -std=gnu++17
+  FLAGS = -g -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX13.0.sdk -g -O0 -Wall -Wpedantic -std=gnu++17
   INCLUDES = -I/Users/kiran/Documents/Projects/ICLR/libriccore/src -I/Users/kiran/Documents/Projects/ICLR/libriccore/src/libriccore -I/Users/kiran/Documents/Projects/ICLR/libriccore/include -I/Users/kiran/Documents/Projects/ICLR/libriccore/include/impl/unix
   OBJECT_DIR = CMakeFiles/libriccore.dir
   OBJECT_FILE_DIR = CMakeFiles/libriccore.dir/src
@@ -113,7 +113,7 @@ build cmake_object_order_depends_target_hal: phony || include/CMakeFiles/hal.dir
 
 build include/CMakeFiles/hal.dir/impl/unix/thread.cpp.o: CXX_COMPILER__hal_Debug /Users/kiran/Documents/Projects/ICLR/libriccore/include/impl/unix/thread.cpp || cmake_object_order_depends_target_hal
   DEP_FILE = include/CMakeFiles/hal.dir/impl/unix/thread.cpp.o.d
-  FLAGS = -g -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX13.0.sdk -g -O0 -std=gnu++17
+  FLAGS = -g -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX13.0.sdk -g -O0 -Wall -Wpedantic -std=gnu++17
   INCLUDES = -I/Users/kiran/Documents/Projects/ICLR/libriccore/include/. -I/Users/kiran/Documents/Projects/ICLR/libriccore/include/impl/unix
   OBJECT_DIR = include/CMakeFiles/hal.dir
   OBJECT_FILE_DIR = include/CMakeFiles/hal.dir/impl/unix
@@ -175,7 +175,7 @@ build cmake_object_order_depends_target_source: phony || src/CMakeFiles/source.d
 
 build src/CMakeFiles/source.dir/main.cpp.o: CXX_COMPILER__source_Debug /Users/kiran/Documents/Projects/ICLR/libriccore/src/main.cpp || cmake_object_order_depends_target_source
   DEP_FILE = src/CMakeFiles/source.dir/main.cpp.o.d
-  FLAGS = -g -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX13.0.sdk -g -O0 -std=gnu++17
+  FLAGS = -g -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX13.0.sdk -g -O0 -Wall -Wpedantic -std=gnu++17
   INCLUDES = -I"/Users/kiran/Documents/Projects/ICLR/libriccore/src/*" -I/Users/kiran/Documents/Projects/ICLR/libriccore/src/../include -I/Users/kiran/Documents/Projects/ICLR/libriccore/src/../include/impl/unix -I/Users/kiran/Documents/Projects/ICLR/libriccore/src/libriccore
   OBJECT_DIR = src/CMakeFiles/source.dir
   OBJECT_FILE_DIR = src/CMakeFiles/source.dir
