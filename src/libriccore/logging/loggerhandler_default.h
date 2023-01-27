@@ -2,9 +2,13 @@
 #include <tuple>
 #include "loggers/coutlogger.h"
 
+
 enum class LOGGER
 {
-    SYS
+    SYS // default system logging
 };
 
-const inline auto logger_list = std::make_tuple(CoutLogger("SYS_LOG"));
+const inline std::tuple logger_list = 
+{
+    CoutLogger("SYS_LOG")
+};

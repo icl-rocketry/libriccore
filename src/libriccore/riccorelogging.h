@@ -1,9 +1,9 @@
 #pragma once
-#include "logging/loggerhandler_config.h"
+#include "logging/loggerhandler_tweak.h"
 #include "logging/loggerhandler.h"
 
 struct RicCoreLogging{
-
+   
     /**
      * @brief call log on the given logger with the correct arguments
      * 

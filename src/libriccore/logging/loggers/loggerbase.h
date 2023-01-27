@@ -3,7 +3,7 @@
 class LoggerBase{
     public:
 
-        constexpr LoggerBase():
+        LoggerBase():
         initalized(false)
         {};
         

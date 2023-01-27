@@ -14,7 +14,7 @@
 #include <memory>
 #include <cstdint>
 
-#include "riccoretypes.h"
+#include "systemflags_tweak.h"
 
 #include "state.h"
 
@@ -27,15 +27,24 @@ public:
    *
    * @param initialState
    */
-  StateMachine(std::unique_ptr<State> initialState) : currState(std::move(initialState)){};
+  StateMachine() : currState(nullptr){};
+
+  /**
+   * @brief Initalize state machine with inital state pointer
+   * 
+   * @param initialState 
+   */
+  void initalize(std::unique_ptr<State> initialState)
+  {
+    changeState(std::move(initialState));
+  }
 
   /**
    * @brief Update hook for the statemachine. Calls update on the individual states. If the state
    * returns nullptr or std::unique_ptr<State>(nullptr), the statemachine will keep looping the state. If the state
    * returns a non null std::unique_ptr, the statemachine will call change state to change the current state.
-   * 
+   *
    */
-
   void update()
   {
     std::unique_ptr<State> returnedState = currState->update();
@@ -44,26 +53,30 @@ public:
     {
       changeState(std::move(returnedState));
     }
-
   };
 
   /**
    * @brief Method forces statemachine to change state. Destructor is called on currState before being
    * replaced by the new state. Remeber to use std::make_unique when calling this
-   * 
-   * @param newStatePtr 
+   *
+   * @param newStatePtr
    */
 
   void changeState(std::unique_ptr<State> newState)
   {
+    if (currState)
+    { // call exit only if currState is not null
+      currState->exit();
+    }
     currState = std::move(newState);
+    currState->initialize();
   };
 
-  RicCoreTypes::stateID_t getCurrentStateID(){
+  SYSTEM_FLAGS getCurrentStateID()
+  {
     return currState->getID();
   }
 
 private:
   std::unique_ptr<State> currState;
-
 };

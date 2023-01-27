@@ -7,7 +7,7 @@
 #include "fsm/statemachine.h"
 
 #include "systemstatus/systemstatus.h"
-#include "systemflags_config.h" // config headers select correct tweak header
+#include "systemflags_tweak.h" // config headers select correct tweak header
 
 #include "logging/loggerhandler.h"
 
@@ -34,6 +34,7 @@ class RicCoreSystem{
         void coreSystemUpdateLoop(){
             networkmanager.update();
             static_cast<DERIVED*>(this)->systemUpdateLoop();
+            statemachine.update();
         };
 
         /**
@@ -46,15 +47,15 @@ class RicCoreSystem{
 
     protected:
 
-        SystemStatus<SYSTEM_FLAGS> systemstatus;
+        SystemStatus systemstatus;
 
         LoggerHandler& loggerhandler;
 
         RnpNetworkManager networkmanager;
 
-        
-        
+        StateMachine statemachine;
 
+        
 
     
 };
