@@ -9,7 +9,7 @@
  * 
  */
 #pragma once
-#include "loggerhandler_tweak.h"
+#include "loggerhandler_config_tweak.h"
 
 /**
  * @brief Logger Handler Singleton. This provides the core logging framework targetting two main requirements for 
@@ -37,7 +37,7 @@ class LoggerHandler{
          * @tparam NAME 
          * @return constexpr auto 
          */
-        template<LOGGER NAME>
+        template<RicCoreConfig::LOGGERS NAME>
         constexpr auto retrieve_logger(){
             return std::get<static_cast<int>(NAME)>(config);
         }; 
@@ -48,7 +48,7 @@ class LoggerHandler{
         friend class RicCoreLogging;
         
         
-        const decltype(logger_list) config = logger_list;
+        const decltype(RicCoreConfig::logger_list) config = RicCoreConfig::logger_list;
 
         /**
          * @brief Get the Instance Reference

@@ -15,7 +15,7 @@
 #include <memory>
 
 #include "systemstatus.h"
-#include "systemflags_tweak.h"
+#include "systemflags_config_tweak.h"
 
 #include "util/millis_stub.h"
 

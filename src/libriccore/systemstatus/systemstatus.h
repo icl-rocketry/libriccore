@@ -15,12 +15,12 @@
 #include <string>
 
 #include "riccorelogging.h"
-#include "systemflags_tweak.h"
+#include "systemflags_config_tweak.h"
 
 
 
 
-class SystemStatus : public BitwiseFlagManager<SYSTEM_FLAGS>
+class SystemStatus : public BitwiseFlagManager<RicCoreConfig::SYSTEM_FLAGS>
 {
 public:
     SystemStatus() : BitwiseFlagManager::BitwiseFlagManager(0)
@@ -33,28 +33,28 @@ public:
      * @param flag 
      * @param info 
      */
-    void newFlag(SYSTEM_FLAGS flag, std::string_view info)
+    void newFlag(RicCoreConfig::SYSTEM_FLAGS flag, std::string_view info)
     {
         BitwiseFlagManager::newFlag(flag);
-        RicCoreLogging::log<LOGGER::SYS>(getStatus(), static_cast<uint32_t>(flag), info);
+        RicCoreLogging::log<RicCoreConfig::LOGGERS::SYS>(getStatus(), static_cast<uint32_t>(flag), info);
     };
 
-    void newFlag(SYSTEM_FLAGS flag) override
+    void newFlag(RicCoreConfig::SYSTEM_FLAGS flag) override
     {
         BitwiseFlagManager::newFlag(flag);
-        RicCoreLogging::log<LOGGER::SYS>(getStatus(), static_cast<uint32_t>(flag), "flag raised");
+        RicCoreLogging::log<RicCoreConfig::LOGGERS::SYS>(getStatus(), static_cast<uint32_t>(flag), "flag raised");
     };
 
-    void deleteFlag(SYSTEM_FLAGS flag) override
+    void deleteFlag(RicCoreConfig::SYSTEM_FLAGS flag) override
     {
         BitwiseFlagManager::newFlag(flag);
-        RicCoreLogging::log<LOGGER::SYS>(getStatus(), static_cast<uint32_t>(flag), "flag removed");
+        RicCoreLogging::log<RicCoreConfig::LOGGERS::SYS>(getStatus(), static_cast<uint32_t>(flag), "flag removed");
     };
 
-    void deleteFlag(SYSTEM_FLAGS flag, std::string_view info)
+    void deleteFlag(RicCoreConfig::SYSTEM_FLAGS flag, std::string_view info)
     {
         BitwiseFlagManager::newFlag(flag);
-        RicCoreLogging::log<LOGGER::SYS>(getStatus(), static_cast<uint32_t>(flag), "flag removed");
+        RicCoreLogging::log<RicCoreConfig::LOGGERS::SYS>(getStatus(), static_cast<uint32_t>(flag), "flag removed");
     };
 
 };

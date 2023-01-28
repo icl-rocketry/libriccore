@@ -14,11 +14,12 @@
 
 #pragma once
 #include <cstdint>
-
-enum class SYSTEM_FLAGS:uint32_t{
-    DEBUG = (1 << 7),
-    ERROR_SPI = (1 << 8),
-    ERROR_I2C = (1 << 9),
-    ERROR_SERIAL = (1 << 10),
-    ERROR_STORAGE = (1 << 19),
+namespace RicCoreConfig{
+    enum class SYSTEM_FLAGS:uint32_t{
+        DEBUG = (1 << 7),
+        ERROR_SPI = (1 << 8),
+        ERROR_I2C = (1 << 9),
+        ERROR_SERIAL = (1 << 10),
+        ERROR_STORAGE = (1 << 19),
+    };
 };
