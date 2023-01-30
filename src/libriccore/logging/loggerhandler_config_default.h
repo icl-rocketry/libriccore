@@ -2,7 +2,7 @@
 #include <tuple>
 #include "loggers/coutlogger.h"
 
-namespace RicCoreConfig
+namespace RicCoreLoggingConfig
 {
     enum class LOGGERS
     {

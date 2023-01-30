@@ -15,13 +15,15 @@
 #include <string>
 
 #include "riccorelogging.h"
-#include "systemflags_config_tweak.h"
 
 
 
 
-class SystemStatus : public BitwiseFlagManager<RicCoreConfig::SYSTEM_FLAGS>
+template<typename SYSTEM_FLAGS_T,RicCoreLoggingConfig::LOGGERS LOGGING_TARGET = RicCoreLoggingConfig::LOGGERS::SYS>
+class SystemStatus : public BitwiseFlagManager<SYSTEM_FLAGS_T>
 {
+    // check passed system_flags_t for default flags present
+    
 public:
     SystemStatus() : BitwiseFlagManager::BitwiseFlagManager(0)
                      {};
@@ -33,28 +35,28 @@ public:
      * @param flag 
      * @param info 
      */
-    void newFlag(RicCoreConfig::SYSTEM_FLAGS flag, std::string_view info)
+    void newFlag(SYSTEM_FLAGS_T flag, std::string_view info)
     {
         BitwiseFlagManager::newFlag(flag);
-        RicCoreLogging::log<RicCoreConfig::LOGGERS::SYS>(getStatus(), static_cast<uint32_t>(flag), info);
+        RicCoreLogging::log<LOGGING_TARGET>(getStatus(), static_cast<uint32_t>(flag), info);
     };
 
-    void newFlag(RicCoreConfig::SYSTEM_FLAGS flag) override
+    void newFlag(SYSTEM_FLAGS_T flag) override
     {
         BitwiseFlagManager::newFlag(flag);
-        RicCoreLogging::log<RicCoreConfig::LOGGERS::SYS>(getStatus(), static_cast<uint32_t>(flag), "flag raised");
+        RicCoreLogging::log<LOGGING_TARGET>(getStatus(), static_cast<uint32_t>(flag), "flag raised");
     };
 
-    void deleteFlag(RicCoreConfig::SYSTEM_FLAGS flag) override
+    void deleteFlag(RSYSTEM_FLAGS_T flag) override
     {
         BitwiseFlagManager::newFlag(flag);
-        RicCoreLogging::log<RicCoreConfig::LOGGERS::SYS>(getStatus(), static_cast<uint32_t>(flag), "flag removed");
+        RicCoreLogging::log<LOGGING_TARGET>(getStatus(), static_cast<uint32_t>(flag), "flag removed");
     };
 
-    void deleteFlag(RicCoreConfig::SYSTEM_FLAGS flag, std::string_view info)
+    void deleteFlag(SYSTEM_FLAGS_T flag, std::string_view info)
     {
         BitwiseFlagManager::newFlag(flag);
-        RicCoreLogging::log<RicCoreConfig::LOGGERS::SYS>(getStatus(), static_cast<uint32_t>(flag), "flag removed");
+        RicCoreLogging::log<LOGGING_TARGETS>(getStatus(), static_cast<uint32_t>(flag), "flag removed");
     };
 
 };

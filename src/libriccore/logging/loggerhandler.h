@@ -37,7 +37,7 @@ class LoggerHandler{
          * @tparam NAME 
          * @return constexpr auto 
          */
-        template<RicCoreConfig::LOGGERS NAME>
+        template<RicCoreLoggingConfig::LOGGERS NAME>
         constexpr auto retrieve_logger(){
             return std::get<static_cast<int>(NAME)>(config);
         }; 
@@ -48,7 +48,7 @@ class LoggerHandler{
         friend class RicCoreLogging;
         
         
-        const decltype(RicCoreConfig::logger_list) config = RicCoreConfig::logger_list;
+        const decltype(RicCoreLoggingConfig::logger_list) config = RicCoreLoggingConfig::logger_list;
 
         /**
          * @brief Get the Instance Reference

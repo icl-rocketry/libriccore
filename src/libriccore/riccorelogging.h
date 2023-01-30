@@ -13,7 +13,7 @@ struct RicCoreLogging{
      * @tparam Ts 
      * @param args 
      */
-    template<RicCoreConfig::LOGGERS NAME,class... Ts> // maybe add an assert here to check LOGGER contains NAME for nicer debug message
+    template<RicCoreLoggingConfig::LOGGERS NAME,class... Ts> // maybe add an assert here to check LOGGER contains NAME for nicer debug message
     static void log(Ts&&... args){
         LoggerHandler::getInstance().retrieve_logger<NAME>().log(std::forward<Ts>(args)...);
         };

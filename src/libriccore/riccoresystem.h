@@ -7,7 +7,7 @@
 #include "fsm/statemachine.h"
 
 #include "systemstatus/systemstatus.h"
-// #include "systemflags_config_tweak.h" // config headers select correct tweak header
+
 
 #include "logging/loggerhandler.h"
 
@@ -16,7 +16,8 @@
 
 
 
-template<typename DERIVED>
+template<typename DERIVED,
+         typename SYSTEM_FLAGS_T>
 class RicCoreSystem{
     //checks if derived class is hiding main update loop
     static_assert(!is_detected<decltype(DERIVED::coreSystemUpdateLoop, DERIVED)>::value, "Dervied System re-implements underlying update loop!"); 
@@ -47,7 +48,7 @@ class RicCoreSystem{
 
     protected:
 
-        SystemStatus systemstatus;
+        SystemStatus systemstatus<SYSTEM_FLAGS_T>;
 
         LoggerHandler& loggerhandler;
 

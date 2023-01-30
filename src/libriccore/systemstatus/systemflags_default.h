@@ -14,7 +14,7 @@
 
 #pragma once
 #include <cstdint>
-namespace RicCoreConfig{
+namespace RicCoreSystemFlags_Default{
     enum class SYSTEM_FLAGS:uint32_t{
         DEBUG = (1 << 7),
         ERROR_SPI = (1 << 8),

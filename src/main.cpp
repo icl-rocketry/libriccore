@@ -146,6 +146,6 @@
 
 
 int main() {
-    RicCoreLogging::log<LOGGER::SYS>("test log");
+    RicCoreLogging::log<RicCoreLoggingConfig::LOGGER::SYS>("test log");
    
 }
