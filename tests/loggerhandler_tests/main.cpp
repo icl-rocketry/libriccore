@@ -6,5 +6,5 @@
 
 
 int main() {
-    RicCoreLogging::log<LOGGER::SYS>("test log");
+    RicCoreLogging::log<RicCoreLoggingConfig::LOGGERS::SYS>("test log");
 }

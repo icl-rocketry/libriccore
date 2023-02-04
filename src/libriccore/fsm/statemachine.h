@@ -14,10 +14,9 @@
 #include <memory>
 #include <cstdint>
 
-#include "systemflags_config_tweak.h"
-
 #include "state.h"
 
+template<typename SYSTEM_FLAG_T>
 class StateMachine
 {
 
@@ -34,7 +33,7 @@ public:
    * 
    * @param initialState 
    */
-  void initalize(std::unique_ptr<State> initialState)
+  void initalize(std::unique_ptr<State<SYSTEM_FLAG_T>> initialState)
   {
     changeState(std::move(initialState));
   }
@@ -47,7 +46,7 @@ public:
    */
   void update()
   {
-    std::unique_ptr<State> returnedState = currState->update();
+    std::unique_ptr<State<SYSTEM_FLAG_T>> returnedState = currState->update();
 
     if (returnedState)
     {
@@ -62,7 +61,7 @@ public:
    * @param newStatePtr
    */
 
-  void changeState(std::unique_ptr<State> newState)
+  void changeState(std::unique_ptr<State<SYSTEM_FLAG_T>> newState)
   {
     if (currState)
     { // call exit only if currState is not null
@@ -72,11 +71,11 @@ public:
     currState->initialize();
   };
 
-  SYSTEM_FLAGS getCurrentStateID()
+  SYSTEM_FLAG_T getCurrentStateID()
   {
     return currState->getID();
   }
 
 private:
-  std::unique_ptr<State> currState;
+  std::unique_ptr<State<SYSTEM_FLAG_T>> currState;
 };

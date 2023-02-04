@@ -15,10 +15,11 @@
 #include <memory>
 
 #include "systemstatus.h"
-#include "systemflags_config_tweak.h"
+
 
 #include "util/millis_stub.h"
 
+template<typename SYSTEM_FLAGS_T>
 class State
 {
 
@@ -29,7 +30,7 @@ public:
    * @param ID
    * @param systemstatus
    */
-  State(SYSTEM_FLAGS ID, SystemStatus systemstatus) : stateID(ID),
+  State(SYSTEM_FLAGS_T ID, SystemStatus<SYSTEM_FLAGS_T> systemstatus) : stateID(ID),
                                                       _systemstatus(systemstatus){};
 
   virtual ~State(){};
@@ -50,9 +51,9 @@ public:
    *
    * @return std::unique_ptr<State>
    */
-  virtual std::unique_ptr<State> update()
+  virtual std::unique_ptr<State<SYSTEM_FLAGS_T>> update()
   {
-    return std::unique_ptr<State>(nullptr);
+    return std::unique_ptr<State<SYSTEM_FLAGS_T>>(nullptr);
   };
 
   /**
@@ -71,17 +72,18 @@ public:
    *
    * @return SYSTEM_FLAGS
    */
-  SYSTEM_FLAGS getID()
+  SYSTEM_FLAGS_T getID()
   {
     return stateID;
   };
 
 protected:
-  const SYSTEM_FLAGS stateID;
+  const SYSTEM_FLAGS_T stateID;
 
   uint64_t time_entered_state;
   uint64_t time_exited_state;
   uint64_t time_duration_state;
 
-  SystemStatus &_systemstatus;
+  SystemStatus<SYSTEM_FLAGS_T> &_systemstatus;
 };
+
