@@ -4,6 +4,7 @@
 //From librnp
 #include "rnp_networkmanager.h"
 #include "rnp_default_address.h"
+#include "rnp_nvs_save.h"
 
 #include "fsm/statemachine.h"
 
@@ -39,8 +40,11 @@ class RicCoreSystem{
          * 
          */
         void coreSystemSetup(){
-
+            networkManagerSetup();
+            static_cast<DERIVED*>(this)->systemSetup();
         };
+
+        void systemSetup(){};
 
         /**
          * @brief core system update loop, calls the derived update loop aswell. Don't hide this function in the derived class!
@@ -59,6 +63,7 @@ class RicCoreSystem{
          */
         void systemUpdate(){};
 
+        
 
     protected:
 
@@ -75,8 +80,35 @@ class RicCoreSystem{
          * 
          */
         void networkManagerSetup(){
+            //register logging callback
+            networkmanager.setLogCb([](const std::string& message){RicCoreLogging::log<RicCoreLoggingConfig::LOGGERS::SYS>(message);});
+
+            // register debug interface
+            networkmanager.addInterface(&usbserial);
+
+            //generate default network routes in the routing table
+            networkmanager.generateDefaultRoutes();            
+
+            //setup default config of network manager
+            networkmanager.enableAutoRouteGen(false);
+            networkmanager.setNoRouteAction(NOROUTE_ACTION::DUMP,{});
             
-        };
+            // command handler callback
+            networkmanager.registerService(static_cast<uint8_t>(DEFAULT_SERVICES::COMMAND),commandhandler.getCallback()); 
+        
+            
+            //configure save function from network manager
+            networkmanager.setSaveConfigImpl(RnpNvsSave::SaveToNVS);
+
+            //try to load previous net config from nvs
+            RnpNetworkManagerConfig savedNetworkConfig;
+            if (!RnpNvsSave::ReadFromNVS(savedNetworkConfig))
+            {
+                RicCoreLogging::log<RicCoreLoggingConfig::LOGGERS::SYS>("Loading Saved Network Config!");
+                networkmanager.loadconfig(savedNetworkConfig);
+            }
+
+        };  
         
 
     
