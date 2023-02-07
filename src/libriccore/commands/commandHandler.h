@@ -16,23 +16,41 @@
 #include "rnp_networkservice.h"
 #include <default_packets/simplecommandpacket.h>
 
+#include "util/bitsethelpers.h"
+
 template <typename SYSTEM_T,
           typename COMMAND_ID_ENUM,
-          const std::unordered_map<COMMAND_ID_ENUM, std::function<void(SYSTEM_T &, const RnpPacketSerialized &)>> COMMAND_MAP,
-          uint256_t DEFAULT_ALWAYS_ENABLED_COMMANDS,
-          uint8_t SERVICE_ID>
+          uint8_t SERVICE_ID,
+          size_t N_MAX_COMMANDS = 256>
 
 class CommandHandler : public RnpNetworkService
 {
+    static_assert(std::is_enum_v<COMMAND_ID_ENUM>, "COMMAND_ID_ENUM template paramter not an enum!");
 public: // public type defintions to make life a bit easier to get types for the command handler
     using commandFunction_t = std::function<void(SYSTEM_T &, const RnpPacketSerialized &)>;
-    using commandMap_t = decltype(COMMAND_MAP);
+    using commandMap_t = std::unordered_map<COMMAND_ID_ENUM, commandFunction_t>>;
+private: 
+    using bitset_t = std::bitset<N_MAX_COMMANDS>;
 
 public:
-    CommandHandler(SYSTEM_T &sys) : RnpNetworkService(SERVICE_ID),
-                                    _sys(sys),
-                                    _commandMap(COMMAND_MAP),
-                                    _enabledCommands(_alwaysEnabledCommands){};
+
+    CommandHandler(SYSTEM_T &sys,commandMap_t commandMap) : 
+                        RnpNetworkService(SERVICE_ID),
+                        _sys(sys),
+                        _commandMap(commandMap),
+                        _defaultPersistentEnabledCommands(0),
+                        _persistentEnabledCommands(_defaultPersistentEnabledCommands),
+                        _enabledCommands(_persistentEnabledCommands){};
+
+    template <class T>
+    CommandHandler(SYSTEM_T &sys,commandMap_t commandMap, std::initializer_list<T> defaultPersistCommands) : 
+                                                        RnpNetworkService(SERVICE_ID),
+                                                        _sys(sys),
+                                                        _commandMap(commandMap),
+                                                        _defaultPersistentEnabledCommands(BitsetHelpers::generateBitset<N_MAX_COMMANDS>(defaultPersistCommands)),
+                                                        _persistentEnabledCommands(_defaultPersistentEnabledCommands),
+                                                        _enabledCommands(_persistentEnabledCommands){};
+    {};
 
     enum class PACKET_TYPES : uint8_t
     {
@@ -42,62 +60,28 @@ public:
         TELEMETRY_RESPONSE = 101
     };
 
-    /**
-     * @brief Enable Commands integral type template specialization, handles integer types
-     * 
-     * @tparam T 
-     * @tparam std::enable_if<std::is_integral_v<T>, int>::type 
-     * @param command_list 
-     */
-    template<class T,typename std::enable_if<std::is_integral_v<T>, int>::type = 0>
-    void enable_commands(std::initializer_list<T> command_list){
-        enable_commands_IMPL<T,T>(command_list);
-    };
+    template<class T>
+    void enableCommands(std::initializer_list<T> command_ids)
+    {
+        static_assert(std::is_integral_v<T> || (std::is_enum_v<T> && std::is_same_v<T,COMMAND_ID_ENUM>),"Enum Type not the same as COMMAND_ID_ENUM template type!");
+        BitsetHelpers::setBits(_enabledCommands,command_ids);
+    }
 
-    /**
-     * @brief Enable Commands Enum type template specialization, handles only COMMAND_ID_ENUM type, any other enum will cause an assert
-     * 
-     * @tparam T 
-     * @tparam std::enable_if<std::is_enum_v<T>, int>::type 
-     * @param command_list 
-     */
-    template<class T,typename std::enable_if<std::is_enum_v<T>, int>::type = 0>
-    void enable_commands(std::initializer_list<T> command_list){
-        static_assert(std::is_same_v<T,COMMAND_ID_ENUM>,"Enum passed is not the same as the command id enum");
-        using T_underlying = typename std::underlying_type_t<T>;
-        enable_commands_IMPL<T,T_underlying>(command_list);
-    };
+    template<class T>
+    void disableCommands(std::initializer_list<T> command_ids)
+    {
+        static_assert(std::is_integral_v<T> || (std::is_enum_v<T> && std::is_same_v<T,COMMAND_ID_ENUM>),"Enum Type not the same as COMMAND_ID_ENUM template type!");
+        BitsetHelpers::resetBits(_enabledCommands,command_ids);
+        //ensure that persistent enabled commands do not get reset
+        _enabledCommands |= _persistentEnabledCommands;
+    }
 
-    /**
-     * @brief Disable Commands integral type template specialization, handles integer types
-     * 
-     * @tparam T 
-     * @tparam std::enable_if<std::is_integral_v<T>, int>::type 
-     * @param command_list 
-     */
-    template<class T,typename std::enable_if<std::is_integral_v<T>, int>::type = 0>
-    void disable_commands(std::initializer_list<T> command_list){
-        disable_commands_IMPL<T,T>(command_list);
-    };
-
-    /**
-     * @brief Disable Commands Enum type template specialization, handles only COMMAND_ID_ENUM type, any other enum will cause an assert
-     * 
-     * @tparam T 
-     * @tparam std::enable_if<std::is_enum_v<T>, int>::type 
-     * @param command_list 
-     */
-    template<class T,typename std::enable_if<std::is_enum_v<T>, int>::type = 0>
-    void disable_commands(std::initializer_list<T> command_list){
-        static_assert(std::is_same_v<T,COMMAND_ID_ENUM>,"Enum passed is not the same as the command id enum");
-        using T_underlying = typename std::underlying_type_t<T>;
-        disable_commands_IMPL<T,T_underlying>(command_list);
-    };
-
-    void reset_commands()
+    void resetCommands()
     {
         _enabledCommands = _alwaysEnabledCommands;
     }
+
+
     
 
 private:
@@ -114,16 +98,22 @@ private:
     const commandMap_t _commandMap;
 
     /**
+     * @brief Constant Bitset to store the default persistent enabled commands
+     * 
+     */
+    const bitset_t _defaultPersistentEnabledCommands;
+
+    /**
+     * @brief Bitset to track commands which should persist during resets of the enabled command bitset
+     *
+     */
+    bitset_t _persistentEnabledCommands;
+
+    /**
      * @brief Bitset to track enabled and disabled commmands
      *
      */
-    std::bitset<256> _enabledCommands;
-
-    /**
-     * @brief Constant Bitset to track commands which should persist during resets of the enabled command bitset
-     *
-     */
-    std::bitset<256> _persistentEnabledCommands{DEFAULT_ALWAYS_ENABLED_COMMANDS};
+    bitset_t _enabledCommands;
 
     /**
      * @brief Process the recevied command packet
