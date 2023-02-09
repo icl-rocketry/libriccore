@@ -18,6 +18,7 @@
 
 #include "util/bitsethelpers.h"
 
+
 template <typename SYSTEM_T,
           typename COMMAND_ID_ENUM,
           uint8_t SERVICE_ID,
@@ -26,6 +27,8 @@ template <typename SYSTEM_T,
 class CommandHandler : public RnpNetworkService
 {
     static_assert(std::is_enum_v<COMMAND_ID_ENUM>, "COMMAND_ID_ENUM template paramter not an enum!");
+
+//type aliases
 public: // public type defintions to make life a bit easier to get types for the command handler
     using commandFunction_t = std::function<void(SYSTEM_T &, const RnpPacketSerialized &)>;
     using commandMap_t = std::unordered_map<COMMAND_ID_ENUM, commandFunction_t>>;
@@ -34,6 +37,14 @@ private:
 
 public:
 
+    /**
+     * @brief Command handler constructor with default intialization for the default persistent enabled commands
+     * 
+     * @author Kiran de Silva
+     * 
+     * @param sys referece to the derived system object to allow commands to access system objects
+     * @param commandMap unordered map from the command id to the function call back for a given command
+     */
     CommandHandler(SYSTEM_T &sys,commandMap_t commandMap) : 
                         RnpNetworkService(SERVICE_ID),
                         _sys(sys),
@@ -42,8 +53,18 @@ public:
                         _persistentEnabledCommands(_defaultPersistentEnabledCommands),
                         _enabledCommands(_persistentEnabledCommands){};
 
+    /**
+     * @brief  Command handler constructor with support for intializing the default persisnent enabled command bitset.
+     * 
+     * @author Kiran de Silva
+     * 
+     * @tparam T type of element of intializer list
+     * @param sys reference to the dervied system object
+     * @param commandMap unordered map from the command id to the function call back for a given command
+     * @param defaultPersistCommands intializer list of command ids to always be enabled during system lifetime
+     */
     template <class T>
-    CommandHandler(SYSTEM_T &sys,commandMap_t commandMap, std::initializer_list<T> defaultPersistCommands) : 
+    CommandHandler(SYSTEM_T &sys,commandMap_t commandMap,const std::initializer_list<T> defaultPersistCommands) : 
                                                         RnpNetworkService(SERVICE_ID),
                                                         _sys(sys),
                                                         _commandMap(commandMap),
@@ -52,6 +73,10 @@ public:
                                                         _enabledCommands(_persistentEnabledCommands){};
     {};
 
+    /**
+     * @brief Commonly used packet types for the command handling service.
+     * 
+     */
     enum class PACKET_TYPES : uint8_t
     {
         SIMPLE = 0,
@@ -67,12 +92,17 @@ public:
      * 
      * @tparam T Type of the list element, can be integral or enum type, however enum type must match COMMAND_ID_ENUM type
      * @param command_ids initializer list of command ids to be enabled
+     * @param persist enable command and persist throught command bit field resets
      */
     template<class T>
-    void enableCommands(std::initializer_list<T> command_ids)
+    void enableCommands(const std::initializer_list<T> command_ids,bool persist = false)
     {
         static_assert(std::is_integral_v<T> || (std::is_enum_v<T> && std::is_same_v<T,COMMAND_ID_ENUM>),"Enum Type not the same as COMMAND_ID_ENUM template type!");
         BitsetHelpers::setBits(_enabledCommands,command_ids);
+        if (persist){ 
+            // if we require the command to always be enabled, also set the bit in the persistent Enabled Commands bitset
+            BitsetHelpers::setBits(_persistentEnabledCommands,command_ids);
+        }
     }
 
     /**
@@ -82,18 +112,28 @@ public:
      * 
      * @tparam T Type of the list element, can be integral or enum type, however enum type must match COMMAND_ID_ENUM type
      * @param command_ids initializer list of command ids to be enabled
+     * @param persist set true to disable a command which has been enabled persistently
      */
     template<class T>
-    void disableCommands(std::initializer_list<T> command_ids)
+    void disableCommands(const std::initializer_list<T> command_ids, bool persist = false)
     {
         static_assert(std::is_integral_v<T> || (std::is_enum_v<T> && std::is_same_v<T,COMMAND_ID_ENUM>),"Enum Type not the same as COMMAND_ID_ENUM template type!");
         BitsetHelpers::resetBits(_enabledCommands,command_ids);
+        
+        if (persist){ 
+            // if we want to reset a persistently enabled command, we must also reset the command id in the persistent enabled command bitset
+            BitsetHelpers::resetBits(_persistentEnabledCommands,command_ids);
+        }
+
         //ensure that persistent enabled commands do not get reset
         _enabledCommands |= _persistentEnabledCommands;
+        
     }
 
     /**
      * @brief Reset commands to the persistent enabled commands
+     * 
+     * @author Kiran de Silva
      * 
      */
     void resetCommands()
@@ -101,6 +141,16 @@ public:
         _enabledCommands = _persistentEnabledCommands;
     }
 
+    /**
+     * @brief Reset persistent enabled commands to the default persistent enabled commands
+     * 
+     * @author Kiran de Silva
+     * 
+     */
+    void resetPersistentCommands()
+    {
+        _persistentEnabledCommands = _defaultPersistentEnabledCommands;
+    }
 
     
 
@@ -161,38 +211,6 @@ private:
     {
         handleCommand(std::move(packetptr));
     };
-
-    /**
-     * @brief Enables a list of command ids to be executed
-     *
-     * @tparam T1 T2
-     * @param command_list
-     */
-    template <class T1,class T2>
-    void enable_commands_IMPL(std::initializer_list<T1> command_list)
-    {
-        for (auto command_id : command_list)
-        {
-            _enabledCommands.set(static_cast<T2>command_id);
-        }
-    }
-
-    /**
-     * @brief Disables passed command id as long as it is not set in always enabled commands
-     *
-     * @tparam T1 T2
-     * @param command_list
-     */
-    template <class T1, class T2>
-    void disable_commands_IMPL(std::initializer_list<T1> command_list)
-    {
-        for (auto command_id : command_list)
-        {
-            _enabledCommands.reset(static_cast<T2>(command_id));
-        }
-        // ensure that _alwaysEnabledCommands arent disabled
-        _enabledCommands |= _alwaysEnabledCommands;
-    }
 
 
 };

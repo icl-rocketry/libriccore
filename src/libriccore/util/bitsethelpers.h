@@ -24,7 +24,7 @@ namespace BitsetHelpers{
      * @param bits initializer list of bit indicies to modify
      */
     template<size_t SIZE,class T1,class T2>
-    void setBits_impl(std::bitset<SIZE> &bitset,std::initializer_list<T1> bits)
+    void setBits_impl(std::bitset<SIZE> &bitset,const std::initializer_list<T1> bits)
     {
         for (auto& idx : bits){
             bitset.set(static_cast<T2>(idx));         
@@ -43,7 +43,7 @@ namespace BitsetHelpers{
      * @param bits 
      */
     template<size_t SIZE,class T,typename std::enable_if<std::is_integral_v<T>, int>::type = 0>
-    void setBits(std::bitset<SIZE> &bitset,std::initializer_list<T> bits)
+    void setBits(std::bitset<SIZE> &bitset,const std::initializer_list<T> bits)
     {
         setBits_impl<SIZE,T,T>(bitset,bits);
     }
@@ -60,7 +60,7 @@ namespace BitsetHelpers{
      * @param bits 
      */
     template<size_t SIZE,class T,typename std::enable_if<std::is_enum_v<T>, int>::type = 0>
-    void setBits(std::bitset<SIZE> &bitset,std::initializer_list<T> bits)
+    void setBits(std::bitset<SIZE> &bitset,const std::initializer_list<T> bits)
     {
         using T_underlying = typename std::underlying_type_t<T>;
         setBits_impl<SIZE,T,T_underlying>(bitset,bits);
@@ -78,7 +78,7 @@ namespace BitsetHelpers{
      * @param bits initializer list of bit indicies to modify
      */
     template<size_t SIZE,class T1,class T2>
-    void resetBits_impl(std::bitset<SIZE> &bitset,std::initializer_list<T1> bits)
+    void resetBits_impl(std::bitset<SIZE> &bitset,const std::initializer_list<T1> bits)
     {
         for (auto& idx : bits){
             bitset.reset(static_cast<T2>(idx));         
@@ -97,7 +97,7 @@ namespace BitsetHelpers{
      * @param bits 
      */
     template<size_t SIZE,class T,typename std::enable_if<std::is_integral_v<T>, int>::type = 0>
-    void resetBits(std::bitset<SIZE> &bitset,std::initializer_list<T> bits)
+    void resetBits(std::bitset<SIZE> &bitset,const std::initializer_list<T> bits)
     {
         resetBits_impl<SIZE,T,T>(bitset,bits);
     }
@@ -114,7 +114,7 @@ namespace BitsetHelpers{
      * @param bits 
      */
     template<size_t SIZE,class T,typename std::enable_if<std::is_enum_v<T>, int>::type = 0>
-    void resetBits(std::bitset<SIZE> &bitset,std::initializer_list<T> bits)
+    void resetBits(std::bitset<SIZE> &bitset,const std::initializer_list<T> bits)
     {
         using T_underlying = typename std::underlying_type_t<T>;
         resetBits_impl<SIZE,T,T_underlying>(bitset,bits);
@@ -129,7 +129,7 @@ namespace BitsetHelpers{
      * @return std::bitset<SIZE> 
      */
     template<size_t SIZE,class T>
-    std::bitset<SIZE> generateBitset(std::initializer_list<T> bits)
+    std::bitset<SIZE> generateBitset(const std::initializer_list<T> bits)
     {
         std::bitset<SIZE> ret;
         setBits(ret,bits);
