@@ -11,5 +11,6 @@ namespace RicCoreLoggingConfig
 
     const inline std::tuple logger_list =
         {
-            CoutLogger("SYS_LOG")};
+            CoutLogger("SYS_LOG")
+        };
 };

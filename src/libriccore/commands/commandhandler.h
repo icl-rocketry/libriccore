@@ -21,9 +21,7 @@
 
 template <typename SYSTEM_T,
           typename COMMAND_ID_ENUM,
-          uint8_t SERVICE_ID,
           size_t N_MAX_COMMANDS = 256>
-
 class CommandHandler : public RnpNetworkService
 {
     static_assert(std::is_enum_v<COMMAND_ID_ENUM>, "COMMAND_ID_ENUM template paramter not an enum!");
@@ -44,9 +42,10 @@ public:
      * 
      * @param sys referece to the derived system object to allow commands to access system objects
      * @param commandMap unordered map from the command id to the function call back for a given command
+     * @param ServiceID network service ID
      */
-    CommandHandler(SYSTEM_T &sys,commandMap_t commandMap) : 
-                        RnpNetworkService(SERVICE_ID),
+    CommandHandler(SYSTEM_T &sys,commandMap_t commandMap,const uint8_t ServiceID) : 
+                        RnpNetworkService(ServiceID),
                         _sys(sys),
                         _commandMap(commandMap),
                         _defaultPersistentEnabledCommands(0),
@@ -61,11 +60,12 @@ public:
      * @tparam T type of element of intializer list
      * @param sys reference to the dervied system object
      * @param commandMap unordered map from the command id to the function call back for a given command
+     * @param ServiceID network service ID
      * @param defaultPersistCommands intializer list of command ids to always be enabled during system lifetime
      */
     template <class T>
-    CommandHandler(SYSTEM_T &sys,commandMap_t commandMap,const std::initializer_list<T> defaultPersistCommands) : 
-                                                        RnpNetworkService(SERVICE_ID),
+    CommandHandler(SYSTEM_T &sys,commandMap_t commandMap,,const uint8_t ServiceID,const std::initializer_list<T> defaultPersistCommands) : 
+                                                        RnpNetworkService(ServiceID),
                                                         _sys(sys),
                                                         _commandMap(commandMap),
                                                         _defaultPersistentEnabledCommands(BitsetHelpers::generateBitset<N_MAX_COMMANDS>(defaultPersistCommands)),

@@ -10,6 +10,7 @@
 
 #include "systemstatus/systemstatus.h"
 
+#include "commands/commandhandler.h"
 
 #include "logging/loggerhandler.h"
 
@@ -19,17 +20,20 @@
 
 
 template<typename DERIVED,
-         typename SYSTEM_FLAGS_T>
+         typename SYSTEM_FLAGS_T,
+         typename COMMAND_ID_ENUM>
 class RicCoreSystem{
     //checks if derived class is hiding main update loop
     static_assert(!is_detected<decltype(DERIVED::coreSystemUpdate, DERIVED)>::value, "Dervied System re-implements underlying update function!");
     static_assert(!is_detected<decltype(DERIVED::coreSystemSetup, DERIVED)>::value, "Dervied System re-implements underlying setup loop!");  
 
     public:
-        RicCoreSystem():
+        RicCoreSystem(decltype(commandhandler)::commandMap_t commandmap,
+                      const std::initializer_list<COMMAND_ID_ENUM> defaultEnabledCommands):
         systemstatus(),
         loggerhandler(ILoggerHandler::getInstance()),
         networkmanager(static_cast<uint8_t>(DEFAULT_ADDRESS::NOADDRESS),NODETYPE::LEAF,true), //cant remember what happens if u intialize with address zero
+        commandhandler(*(static_cast<DERIVED*>(this)),commandmap,static_cast<uint8_t>(DEFAULT_SERVICES::COMMAND),defaultEnabledCommands),
         statemachine()
         {};
 
@@ -73,7 +77,11 @@ class RicCoreSystem{
 
         RnpNetworkManager networkmanager;
 
+        CommandHandler<DERIVED,COMMAND_ID_ENUM,256> commandhandler;
+
         StateMachine<SYSTEM_FLAGS_T> statemachine;
+
+
         
         /**
          * @brief Perform default network manager setup
@@ -95,8 +103,7 @@ class RicCoreSystem{
             
             // command handler callback
             networkmanager.registerService(static_cast<uint8_t>(DEFAULT_SERVICES::COMMAND),commandhandler.getCallback()); 
-        
-            
+
             //configure save function from network manager
             networkmanager.setSaveConfigImpl(RnpNvsSave::SaveToNVS);
 
