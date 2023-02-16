@@ -68,7 +68,7 @@ public:
                                                         RnpNetworkService(ServiceID),
                                                         _sys(sys),
                                                         _commandMap(commandMap),
-                                                        _defaultPersistentEnabledCommands(BitsetHelpers::generateBitset<N_MAX_COMMANDS>(defaultPersistCommands)),
+                                                        _defaultPersistentEnabledCommands(RicCoreUtil::BitsetHelpers::generateBitset<N_MAX_COMMANDS>(defaultPersistCommands)),
                                                         _persistentEnabledCommands(_defaultPersistentEnabledCommands),
                                                         _enabledCommands(_persistentEnabledCommands){};
     {};
@@ -98,10 +98,10 @@ public:
     void enableCommands(const std::initializer_list<T> command_ids,bool persist = false)
     {
         static_assert(std::is_integral_v<T> || (std::is_enum_v<T> && std::is_same_v<T,COMMAND_ID_ENUM>),"Enum Type not the same as COMMAND_ID_ENUM template type!");
-        BitsetHelpers::setBits(_enabledCommands,command_ids);
+        RicCoreUtil::BitsetHelpers::setBits(_enabledCommands,command_ids);
         if (persist){ 
             // if we require the command to always be enabled, also set the bit in the persistent Enabled Commands bitset
-            BitsetHelpers::setBits(_persistentEnabledCommands,command_ids);
+            RicCoreUtil::BitsetHelpers::setBits(_persistentEnabledCommands,command_ids);
         }
     }
 
@@ -118,11 +118,11 @@ public:
     void disableCommands(const std::initializer_list<T> command_ids, bool persist = false)
     {
         static_assert(std::is_integral_v<T> || (std::is_enum_v<T> && std::is_same_v<T,COMMAND_ID_ENUM>),"Enum Type not the same as COMMAND_ID_ENUM template type!");
-        BitsetHelpers::resetBits(_enabledCommands,command_ids);
+        RicCoreUtil::BitsetHelpers::resetBits(_enabledCommands,command_ids);
         
         if (persist){ 
             // if we want to reset a persistently enabled command, we must also reset the command id in the persistent enabled command bitset
-            BitsetHelpers::resetBits(_persistentEnabledCommands,command_ids);
+            RicCoreUtil::BitsetHelpers::resetBits(_persistentEnabledCommands,command_ids);
         }
 
         //ensure that persistent enabled commands do not get reset

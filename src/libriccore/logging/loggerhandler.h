@@ -9,7 +9,14 @@
  * 
  */
 #pragma once
+
+#include <tuple>
+
+#include "util/istuple.h"
+
 #include "loggerhandler_config_tweak.h"
+
+
 
 /**
  * @brief Logger Handler Singleton. This provides the core logging framework targetting two main requirements for 
@@ -39,16 +46,42 @@ class LoggerHandler{
          */
         template<RicCoreLoggingConfig::LOGGERS NAME>
         constexpr auto retrieve_logger(){
-            return std::get<static_cast<int>(NAME)>(config);
+            return std::get<static_cast<int>(NAME)>(logger_list_tuple);
         }; 
+
+        /**
+         * @brief Call update handle on all registered loggers, This allows periodic tasks to be called in the 
+         * underlying logger such as time dependant log flushing or automatic heartbeat logging. In the apply functor, we use 
+         * auto& rather than LoggerBase* which means we retain flexibility in the type that the Logger class can be. This means
+         * although the intention is to use normal dynamic polymorphism with loggers, static CRTP like inheritance is permitted,
+         * the Logger class doesn't even need to explicity inherit from LoggerBase, all the logger class needs to do is provide 
+         * a method named update.
+         * 
+         * @author K./
+         * 
+         */
+        void update()
+        {
+            std::apply(
+                [](auto &logger) 
+                {
+                    logger.update();
+                },
+                logger_list_tuple);
+        };
 
     private:
         // Interface class friendships
         friend class ILoggerHandler;
         friend class RicCoreLogging;
         
-        
-        const decltype(RicCoreLoggingConfig::logger_list) config = RicCoreLoggingConfig::logger_list;
+        /**
+         * @brief Tuple containing configured loggers for the logger handler. Note this must be an inlined tuple.
+         * 
+         */
+        decltype(RicCoreLoggingConfig::logger_list) logger_list_tuple = RicCoreLoggingConfig::logger_list;
+        //check config is of type tuple
+        static_assert(RicCoreUtil::is_tuple<decltype(RicCoreLoggingConfig::logger_list)>::value, "Logger list is not a tuple!");
 
         /**
          * @brief Get the Instance Reference
@@ -67,17 +100,3 @@ class LoggerHandler{
 
 };
 
-/**
- * @brief Interface to allow RicCoreSystem classes retrieve the instance of the logger handler singleton
- *  This enforces a DI interface for anything that wants to do more than just use the loggers i.e stopping all logging etc...
- * 
- */
-struct ILoggerHandler{
-    private:
-        template<typename PLACEHOLDER> //placeholder required as RicCoreSystem is a template
-        friend class RicCoreSystem;
-
-        static LoggerHandler& getInstance(){
-            return LoggerHandler::getInstance();
-        }
-};

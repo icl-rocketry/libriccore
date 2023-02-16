@@ -10,6 +10,7 @@
  * strings.
  * 
  */
+namespace RicCoreUtil{
 namespace BitsetHelpers{
 
     /**
@@ -137,4 +138,5 @@ namespace BitsetHelpers{
     }
 
 
+};
 };

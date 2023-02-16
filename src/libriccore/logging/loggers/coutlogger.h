@@ -30,6 +30,8 @@ public:
 
     void log(std::string_view msg)
     {   
+        if (!enabled){return;};
+        
         #ifdef ARDUINO
         Serial.println(logger_name.c_str() + ":[" + std::to_string(millis()).c_str() + "] -> "  + msg.c_str());
         #else
@@ -42,7 +44,7 @@ public:
         std::string log_str = std::to_string(flag) + "," + std::string(message) + std::to_string(status);
         log(log_str);
     };
-
+    
     ~CoutLogger(){};
 
 private:

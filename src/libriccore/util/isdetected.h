@@ -1,5 +1,6 @@
+#pragma once
 #include <type_traits>
-
+namespace RicCoreUtil{
 namespace detail {
 template <class Default, class AlwaysVoid,
           template<class...> class Op, class... Args>
@@ -20,3 +21,4 @@ struct nonesuch{};
 
 template <template<class...> class Op, class... Args>
 using is_detected = typename detail::detector<nonesuch, void, Op, Args...>::value_t;
+};

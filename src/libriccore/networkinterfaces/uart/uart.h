@@ -30,7 +30,7 @@ class UART : public RnpInterface
 {
 
 public:
-    UART(HardwareSerial &serial, SystemStatus<SYSTEM_FLAGS_T> &systemstatus, uint8_t id = static_cast<uint8_t>(DEFAULT_INTERFACES::UARTSERIAL), std::string name = "Serial"):
+    UART(HardwareSerial &serial, SystemStatus<SYSTEM_FLAGS_T> &systemstatus, uint8_t id = static_cast<uint8_t>(DEFAULT_INTERFACES::UARTSERIAL), std::string name = "UART0"):
      RnpInterface(id, name),
     _serial(serial),
     _systemstatus(systemstatus)

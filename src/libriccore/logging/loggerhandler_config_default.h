@@ -9,7 +9,7 @@ namespace RicCoreLoggingConfig
         SYS // default system logging
     };
 
-    const inline std::tuple logger_list =
+    inline std::tuple logger_list =
         {
             CoutLogger("SYS_LOG")
         };
