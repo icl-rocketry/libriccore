@@ -6,6 +6,8 @@
 #include "rnp_default_address.h"
 #include "rnp_nvs_save.h"
 
+#include "networkinterfaces/uart/uart.h"
+
 #include "fsm/statemachine.h"
 
 #include "systemstatus/systemstatus.h"
@@ -17,7 +19,7 @@
 #include "util/isdetected.h"
 
 
-
+class HardwareSerial Serial;
 
 template<typename DERIVED,
          typename SYSTEM_FLAGS_T,
@@ -33,6 +35,7 @@ class RicCoreSystem{
         systemstatus(),
         loggerhandler(ILoggerHandler::getInstance()),
         networkmanager(static_cast<uint8_t>(DEFAULT_ADDRESS::NOADDRESS),NODETYPE::LEAF,true), //cant remember what happens if u intialize with address zero
+        uart0(Serial,systemstatus,static_cast<uint8_t>(DEFAULT_INTERFACES::USBSERIAL),"UART0"),
         commandhandler(*(static_cast<DERIVED*>(this)),commandmap,static_cast<uint8_t>(DEFAULT_SERVICES::COMMAND),defaultEnabledCommands),
         statemachine()
         {};
@@ -77,6 +80,8 @@ class RicCoreSystem{
 
         RnpNetworkManager networkmanager;
 
+        UART<SYSTEM_FLAGS_T> uart0;
+
         CommandHandler<DERIVED,COMMAND_ID_ENUM,256> commandhandler;
 
         StateMachine<SYSTEM_FLAGS_T> statemachine;
@@ -92,7 +97,7 @@ class RicCoreSystem{
             networkmanager.setLogCb([](const std::string& message){RicCoreLogging::log<RicCoreLoggingConfig::LOGGERS::SYS>(message);});
 
             // register debug interface
-            networkmanager.addInterface(&usbserial);
+            networkmanager.addInterface(&uart0);
 
             //generate default network routes in the routing table
             networkmanager.generateDefaultRoutes();            
