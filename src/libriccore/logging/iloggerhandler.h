@@ -1,10 +1,6 @@
 #pragma once
 
-/**
- * @brief Forward declaration of the logger handler
- * 
- */
-class LoggerHandler;
+#include "loggerhandler.h"
 
 /**
  * @brief Interface to allow RicCoreSystem classes retrieve the instance of the logger handler singleton
@@ -23,5 +19,6 @@ struct ILoggerHandler{
          */
         friend class MultiSink;
 
-        static LoggerHandler& getInstance();
+        static LoggerHandler& getInstance(){return LoggerHandler::getInstance();};
 };
+

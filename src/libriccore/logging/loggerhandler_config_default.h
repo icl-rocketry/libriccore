@@ -2,11 +2,12 @@
 #include <tuple>
 #include "loggers/coutlogger.h"
 
+
 namespace RicCoreLoggingConfig
 {
     enum class LOGGERS
     {
-        SYS // default system logging
+        SYS, // default system logging
     };
 
     inline std::tuple logger_list =

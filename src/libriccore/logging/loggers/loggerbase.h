@@ -10,7 +10,7 @@ class LoggerBase{
 
         LoggerBase():
         initalized(false),
-        enabled(false)
+        enabled(true)
         {};
         
         ~LoggerBase(){};

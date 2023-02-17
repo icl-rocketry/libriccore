@@ -72,8 +72,8 @@ class LoggerHandler{
 
     private:
         // Interface class friendships
-        friend class ILoggerHandler;
-        friend class RicCoreLogging;
+        friend struct ILoggerHandler;
+        friend struct RicCoreLogging;
         
         /**
          * @brief Tuple containing configured loggers for the logger handler. Note this must be an inlined tuple.
