@@ -12,12 +12,7 @@ struct ILoggerHandler{
         template<typename ...PLACEHOLDER> //placeholder required as RicCoreSystem is a template
         friend class RicCoreSystem;
 
-        template<typename ...PLACEHOLDER>
-        /**
-         * @brief the multi sink logger requires access to the logger handler to retrieve the loggers assigned to it
-         * 
-         */
-        friend class MultiSink;
+
 
         static LoggerHandler& getInstance(){return LoggerHandler::getInstance();};
 };
