@@ -5,6 +5,7 @@
  * TODO
  * - implement support for tracking error status of can driver
  * - add support for hardware based filtering (promiscous mode)
+ * - add stub to emulate can driver on linux system
  * @version 0.1
  * @date 2023-02-04
  *
