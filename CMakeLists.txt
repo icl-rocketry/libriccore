@@ -1,24 +1,16 @@
 cmake_minimum_required(VERSION 3.16.0)
 
-project(libriccore)
-message(STATUS "compiling main")
+project("librcicore" VERSION 1.0)
 
-add_compile_options(-g)
-add_compile_options(-O0)
-add_compile_options(-Wall)
-add_compile_options(-Wpedantic)
+add_library(libriccore INTERFACE)
 
+target_compile_definitions(libriccore INTERFACE -g)
+target_compile_definitions(libriccore INTERFACE -Wall)
+target_compile_definitions(libriccore INTERFACE -Wpedantic)
+target_compile_definitions(libriccore INTERFACE -O0)
+target_compile_features(libriccore INTERFACE cxx_std_17)
 
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/include)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/src)
-# add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/src/libriccore/)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/src/)
+target_link_libraries(libriccore INTERFACE source)
 
-add_executable(libriccore src/main.cpp)
-target_compile_features(libriccore PRIVATE cxx_std_17)
-
-target_link_libraries(libriccore hal source)
-
-target_include_directories(libriccore PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/)
-target_include_directories(libriccore PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/libriccore)
-target_include_directories(libriccore PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include/)
-target_include_directories(libriccore PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include/impl/unix/)
+# add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/include)

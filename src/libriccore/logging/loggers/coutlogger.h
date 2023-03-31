@@ -14,7 +14,7 @@
 
 #include <iostream>
 #include <string>
-#include "util/millis_stub.h"
+#include "libriccore/util/millis_stub.h"
 
 #ifdef ARDUINO
 #include <Arduino.h>

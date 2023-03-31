@@ -1,8 +1,5 @@
-// 
-#include "riccorelogging.h"
 
-
-
+#include <libriccore/riccorelogging.h>
 
 
 int main() {

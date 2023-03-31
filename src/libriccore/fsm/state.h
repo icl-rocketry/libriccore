@@ -14,10 +14,10 @@
 #include <cstdint>
 #include <memory>
 
-#include "systemstatus.h"
+#include "libriccore/systemstatus/systemstatus.h"
 
 
-#include "util/millis_stub.h"
+#include "libriccore/util/millis_stub.h"
 
 template<typename SYSTEM_FLAGS_T>
 class State

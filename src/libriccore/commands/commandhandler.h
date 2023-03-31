@@ -16,7 +16,7 @@
 #include "rnp_networkservice.h"
 #include <default_packets/simplecommandpacket.h>
 
-#include "util/bitsethelpers.h"
+#include "libriccore/util/bitsethelpers.h"
 
 
 template <typename SYSTEM_T,

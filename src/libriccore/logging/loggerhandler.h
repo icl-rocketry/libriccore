@@ -12,7 +12,7 @@
 
 #include <tuple>
 
-#include "util/istuple.h"
+#include "libriccore/util/istuple.h"
 
 #include "loggerhandler_config_tweak.h"
 
