@@ -1,13 +1,13 @@
 cmake_minimum_required(VERSION 3.16.0)
 
-project("librcicore" VERSION 1.0)
+project("libriccore" VERSION 1.0)
 
 add_library(libriccore INTERFACE)
 
 target_compile_options(libriccore INTERFACE -g)
 target_compile_options(libriccore INTERFACE -Wall)
 target_compile_options(libriccore INTERFACE -Wpedantic)
-target_compile_options(libriccore INTERFACE -O0)
+target_compile_options(libriccore INTERFACE -O3) #TODO: should this be an option? Release/debug mode
 target_compile_features(libriccore INTERFACE cxx_std_17)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/src/)
