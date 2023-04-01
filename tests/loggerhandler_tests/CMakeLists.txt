@@ -14,4 +14,4 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../.. ${CMAKE_CURRENT_SOURCE_DIR}/.
 add_executable(libriccore_loggerhandler_test ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp)
 target_compile_features(libriccore_loggerhandler_test PRIVATE cxx_std_17)
 
-target_link_libraries(libriccore_loggerhandler_test PRIVATE source)
+target_link_libraries(libriccore_loggerhandler_test PRIVATE libriccore)
