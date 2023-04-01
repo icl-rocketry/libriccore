@@ -1,4 +1,4 @@
-#include <headers/thread.h>
+#include <libriccore/platform/thread.h>
 
 #include <thread>
 #include <chrono>

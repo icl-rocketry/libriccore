@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include <config.h>
+#include "config.h"
 
 /**
  * Thread manages creation and deletion
