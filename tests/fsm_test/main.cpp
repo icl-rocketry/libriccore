@@ -23,4 +23,4 @@ class MockSystem : public RicCoreSystem<MockSystem,MOCK_SYSTEM_FLAGS>{
 
 int main(){
     return 0;
-}
+}g
