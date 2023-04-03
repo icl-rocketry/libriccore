@@ -5,23 +5,13 @@
 #include <array>
 #include <string>
 // esp specifc
-// #include <HardwareSerial.h>
-//stub for hardware serial for now
-class HardwareSerial{
-    public:
-        size_t availableForWrite(){return 1;};
-        void write(uint8_t* data,size_t size){};
-        bool available(){return 0;};
-        uint8_t read(){return 0;};
-
-};
-
+#include <libriccore/platform/HardwareSerial.h>
 // librnp
 #include "rnp_interface.h"
 #include "rnp_header.h"
 #include "rnp_packet.h"
 //logging
-#include "riccorelogging.h"
+#include <libriccore/riccorelogging.h>
 
 #include "cobs.h"
 

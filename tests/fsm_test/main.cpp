@@ -1,5 +1,7 @@
-#include <riccoresystem.h>
-#include <riccorelogging.h>
+#include <libriccore/riccoresystem.h>
+#include <libriccore/riccorelogging.h>
+
+#include <libriccore/platform/unix/virtualserialport.h>
 
 enum class MOCK_SYSTEM_FLAGS:uint32_t{
     f1,

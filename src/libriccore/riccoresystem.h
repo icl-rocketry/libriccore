@@ -50,7 +50,11 @@ class RicCoreSystem{
             networkManagerSetup();
             static_cast<DERIVED*>(this)->systemSetup();
         };
-
+        
+        /**
+         * @brief Derived system setup method.
+         * 
+         */
         void systemSetup(){};
 
         /**
@@ -116,8 +120,11 @@ class RicCoreSystem{
             RnpNetworkManagerConfig savedNetworkConfig;
             if (!RnpNvsSave::ReadFromNVS(savedNetworkConfig))
             {
-                RicCoreLogging::log<RicCoreLoggingConfig::LOGGERS::SYS>("Loading Saved Network Config!");
+                RicCoreLogging::log<RicCoreLoggingConfig::LOGGERS::SYS>("Loading saved Network Config!");
                 networkmanager.loadconfig(savedNetworkConfig);
+            }else
+            {
+                RicCoreLogging::log<RicCoreLoggingConfig::LOGGERS::SYS>("Failed to load Network Config!");
             }
 
         };  
