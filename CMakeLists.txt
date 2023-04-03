@@ -7,7 +7,8 @@ add_library(libriccore INTERFACE)
 target_compile_options(libriccore INTERFACE -g)
 target_compile_options(libriccore INTERFACE -Wall)
 target_compile_options(libriccore INTERFACE -Wpedantic)
-target_compile_options(libriccore INTERFACE -O3) #TODO: should this be an option? Release/debug mode
+target_compile_options(libriccore INTERFACE -O0) #TODO: should this be an option? Release/debug mode 
+# hmm, because this is being integrated into pio/espidf, it might be better to control it at a project level rather than the librayr level seeing as this lirary is interface
 target_compile_features(libriccore INTERFACE cxx_std_17)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/src/)
