@@ -17,6 +17,7 @@ class MockSystem : public RicCoreSystem<MockSystem,MOCK_SYSTEM_FLAGS>{
         }
 };
 
+VirtualSerialPort vsp1;
 
 
 
