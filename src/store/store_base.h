@@ -75,14 +75,19 @@ public:
         return device_lock;
     }
 
-    virtual std::unique_ptr<WrappedFile> open(std::string path, FILE_MODE mode) = 0;
-    virtual bool ls(std::string path, std::vector<directory_element_t> &directory_structure) = 0;
-    virtual bool mkdir(std::string path) = 0;
-    virtual bool remove(std::string path) = 0; // Removes a file or an empty directory
+    std::unique_ptr<WrappedFile> open(std::string path, FILE_MODE mode);
+    bool ls(std::string path, std::vector<directory_element_t> &directory_structure);
+    bool mkdir(std::string path);
+    bool remove(std::string path); // Removes a file or an empty directory
+
+protected:
+    virtual std::unique_ptr<WrappedFile> _open(std::string path, FILE_MODE mode) = 0;
+    virtual bool _ls(std::string path, std::vector<directory_element_t> &directory_structure) = 0;
+    virtual bool _mkdir(std::string path) = 0;
+    virtual bool _remove(std::string path) = 0; // Removes a file or an empty directory
 
     Lock& device_lock;
 
-protected:
     std::unordered_map<intptr_t, Channel<AppendRequest>> queues;
 
 private:

@@ -52,18 +52,12 @@ class UnixStore : public StoreBase {
 public:
     UnixStore(Lock& device_lock) : StoreBase(device_lock) {}
 
-    std::unique_ptr<WrappedFile> open(std::string path, FILE_MODE mode) {
-        ScopedLock sl(device_lock);
-        auto file = std::make_unique<UnixWrappedFile>(path, mode, *this);
-        intptr_t idx = reinterpret_cast<intptr_t>(file.get());
-        queues.emplace(std::piecewise_construct,
-                       std::forward_as_tuple(idx),
-                       std::forward_as_tuple());
-        return file;
+protected:
+    std::unique_ptr<WrappedFile> _open(std::string path, FILE_MODE mode) {
+        return std::make_unique<UnixWrappedFile>(path, mode, *this);
     }
 
-    bool ls(std::string path, std::vector<directory_element_t> &directory_structure) {
-        ScopedLock sl(device_lock);
+    bool _ls(std::string path, std::vector<directory_element_t> &directory_structure) {
         if (!std::filesystem::exists(path)) return false;
 
         for (const auto& entry : std::filesystem::directory_iterator(path)) {
@@ -82,14 +76,12 @@ public:
         }
         return true;
     }
-    bool mkdir(std::string path) {
-        ScopedLock sl(device_lock);
+    bool _mkdir(std::string path) {
         return std::filesystem::create_directory(path);
     }
 
     // Removes a file or an empty directory
-    bool remove(std::string path) {
-        ScopedLock sl(device_lock);
+    bool _remove(std::string path) {
         return std::filesystem::remove(path);
     }
 };
