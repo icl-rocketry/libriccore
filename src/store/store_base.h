@@ -8,6 +8,10 @@
 
 #include <headers/thread.h>
 
+using fd = uint32_t; // QUESTION: Maybe this can be smaller? - Realistically we're not even gonna have 255 files open at once
+
+class StoreBase;
+class WrappedFile;
 
 enum class FILE_TYPE : uint8_t {
     FILE,
@@ -28,13 +32,15 @@ struct directory_element_t{
 
 struct AppendRequest {
     const std::vector<char>* data; //Must be nullable
+    WrappedFile* file;
     bool* done;
 };
 
-class StoreBase;
 class WrappedFile {
 public:
-    WrappedFile(FILE_MODE mode, StoreBase& store) : mode(mode), store(store) {}
+    WrappedFile(FILE_MODE mode, StoreBase& store);
+
+    const fd file_desc;
 
     // Send a request to the underlying store to store this
     void append(const std::vector<char>& data, bool* done);
@@ -60,7 +66,7 @@ friend StoreBase;
 
 class StoreBase {
 public:
-    StoreBase(Lock& device_lock) : device_lock(device_lock), t((void (*)(void* args)) &StoreBase::flush_task, (void*) this), done(false) {}
+    StoreBase(Lock& device_lock) : device_lock(device_lock), t((void (*)(void* args)) &StoreBase::flush_task, (void*) this), done(false), file_desc(0) {}
 
     ~StoreBase() {
         done = true;
@@ -83,10 +89,14 @@ public:
     bool mkdir(std::string path);
     bool remove(std::string path); // Removes a file or an empty directory
 
-protected:
-    Lock& device_lock;
+    fd get_next_fd();
+    void release_fd(fd file_desc);
 
-    std::unordered_map<intptr_t, Channel<AppendRequest>> queues;
+protected:
+    // This is a reference to another lock in case several devices share a bus
+    Lock& device_lock; // Use this when performing operations on the device e.g. file write
+
+    Lock thread_lock; // Use this when updating shared internal state e.g. the queues map
 
 private:
     virtual std::unique_ptr<WrappedFile> _open(std::string path, FILE_MODE mode) = 0;
@@ -94,8 +104,11 @@ private:
     virtual bool _mkdir(std::string path) = 0;
     virtual bool _remove(std::string path) = 0; // Removes a file or an empty directory
 
+    std::unordered_map<fd, Channel<AppendRequest>> queues;
+
     void flush_task(void*);
     Thread t;
     Semaphore has_work;
+    fd file_desc;
     bool done;
 };
