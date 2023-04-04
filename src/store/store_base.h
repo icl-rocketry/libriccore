@@ -39,14 +39,16 @@ public:
     // Send a request to the underlying store to store this
     void append(const std::vector<char>& data, bool* done);
 
-    virtual void read(std::vector<char>& dest) = 0;
-    virtual void close() = 0; // Should this be done automatically on delete?
+    void read(std::vector<char>& dest);
+    void close(); // Should this be done automatically on delete?
 
 protected:
     FILE_MODE mode;
     StoreBase& store;
 
 private:
+    virtual void _read(std::vector<char>& dest) = 0;
+    virtual void _close() = 0;
 
     //Write/Flush to the underlying file type
     virtual void file_write(const std::vector<char>& data) = 0;
@@ -81,16 +83,16 @@ public:
     bool remove(std::string path); // Removes a file or an empty directory
 
 protected:
-    virtual std::unique_ptr<WrappedFile> _open(std::string path, FILE_MODE mode) = 0;
-    virtual bool _ls(std::string path, std::vector<directory_element_t> &directory_structure) = 0;
-    virtual bool _mkdir(std::string path) = 0;
-    virtual bool _remove(std::string path) = 0; // Removes a file or an empty directory
-
     Lock& device_lock;
 
     std::unordered_map<intptr_t, Channel<AppendRequest>> queues;
 
 private:
+    virtual std::unique_ptr<WrappedFile> _open(std::string path, FILE_MODE mode) = 0;
+    virtual bool _ls(std::string path, std::vector<directory_element_t> &directory_structure) = 0;
+    virtual bool _mkdir(std::string path) = 0;
+    virtual bool _remove(std::string path) = 0; // Removes a file or an empty directory
+
     void flush_task(void*);
     Thread t;
     Semaphore has_work;

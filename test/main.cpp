@@ -24,16 +24,12 @@ public:
         file = std::fstream(path, f_mode);
     }
 
-    void read(std::vector<char>& dest) {
-        if (mode == FILE_MODE::WRITE) {
-            throw std::runtime_error("Cannot read from a writeonly file");
-        }
-        ScopedLock sl(store.get_lock());
+protected:
+    void _read(std::vector<char>& dest) {
         file.read(dest.data(), dest.size());
     }
     
-    void close() {
-        ScopedLock sl(store.get_lock());
+    void _close() {
         file.close();
     }
 

@@ -6,6 +6,20 @@ void WrappedFile::append(const std::vector<char>& data, bool* done) {
     store.append(*this,  req);
 }
 
+void WrappedFile::read(std::vector<char>& dest) {
+    if (mode == FILE_MODE::WRITE) {
+        throw std::runtime_error("Cannot read from a writeonly file");
+    }
+    ScopedLock sl(store.get_lock());
+    _read(dest);
+}
+
+// TODO - handle releasing file descriptors
+void WrappedFile::close() {
+    ScopedLock sl(store.get_lock());
+    _close();
+}
+
 std::unique_ptr<WrappedFile> StoreBase::open(std::string path, FILE_MODE mode) {
     ScopedLock sl(device_lock);
     auto file = _open(path, mode);
@@ -30,7 +44,6 @@ bool StoreBase::remove(std::string path) {
     ScopedLock sl(device_lock);
     return _remove(path);
 }
-
 
 void StoreBase::append(WrappedFile& file, AppendRequest r) {
     intptr_t idx = reinterpret_cast<intptr_t>(&file);
