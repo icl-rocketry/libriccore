@@ -12,6 +12,12 @@ Thread::Thread(void (*f)(void* args), void* args, size_t stack_size, int priorit
 }
 
 Thread::~Thread() {
+    if (handle.joinable()) {
+        join();
+    }
+}
+
+void Thread::join() {
     handle.join();
 }
 

@@ -65,6 +65,7 @@ public:
     ~StoreBase() {
         done = true;
         has_work.up(); // Just incase the other thread is sleeping
+        t.join();
     }
 
     bool ls(std::vector<directory_element_t> &directory_structure) {

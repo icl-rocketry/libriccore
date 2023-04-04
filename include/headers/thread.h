@@ -17,6 +17,8 @@ public:
         std::string name = ""
     );
 
+    void join();
+
     ~Thread();
 
 private:
