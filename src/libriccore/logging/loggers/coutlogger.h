@@ -41,7 +41,7 @@ public:
 
     void log(uint32_t status,uint32_t flag,std::string_view message)
     {
-        std::string log_str = std::to_string(flag) + "," + std::string(message) + std::to_string(status);
+        std::string log_str = std::to_string(flag) + "," + std::string(message) + "," + std::to_string(status);
         log(log_str);
     };
     

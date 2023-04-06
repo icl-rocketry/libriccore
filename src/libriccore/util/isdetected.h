@@ -1,3 +1,11 @@
+/**
+ * @file isdetected.h
+ * @author Kiran de Silva (kd619@ic.ac.uk)
+ * @brief Taken directly from c++17 TSv2 experimental impelmentation as unsure if 
+ * espidf will have the experimental headers
+ * @version 0.1
+ * @date 2023-04-06
+ */
 #pragma once
 #include <type_traits>
 namespace RicCoreUtil{

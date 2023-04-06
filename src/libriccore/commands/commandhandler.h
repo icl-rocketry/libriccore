@@ -29,7 +29,7 @@ class CommandHandler : public RnpNetworkService
 //type aliases
 public: // public type defintions to make life a bit easier to get types for the command handler
     using commandFunction_t = std::function<void(SYSTEM_T &, const RnpPacketSerialized &)>;
-    using commandMap_t = std::unordered_map<COMMAND_ID_ENUM, commandFunction_t>>;
+    using commandMap_t = std::unordered_map<COMMAND_ID_ENUM, commandFunction_t>;
 private: 
     using bitset_t = std::bitset<N_MAX_COMMANDS>;
 
@@ -64,14 +64,14 @@ public:
      * @param defaultPersistCommands intializer list of command ids to always be enabled during system lifetime
      */
     template <class T>
-    CommandHandler(SYSTEM_T &sys,commandMap_t commandMap,,const uint8_t ServiceID,const std::initializer_list<T> defaultPersistCommands) : 
+    CommandHandler(SYSTEM_T &sys,commandMap_t commandMap,const uint8_t ServiceID,const std::initializer_list<T> defaultPersistCommands) : 
                                                         RnpNetworkService(ServiceID),
                                                         _sys(sys),
                                                         _commandMap(commandMap),
                                                         _defaultPersistentEnabledCommands(RicCoreUtil::BitsetHelpers::generateBitset<N_MAX_COMMANDS>(defaultPersistCommands)),
                                                         _persistentEnabledCommands(_defaultPersistentEnabledCommands),
-                                                        _enabledCommands(_persistentEnabledCommands){};
-    {};
+                                                        _enabledCommands(_persistentEnabledCommands)
+                                                        {};
 
     /**
      * @brief Commonly used packet types for the command handling service.

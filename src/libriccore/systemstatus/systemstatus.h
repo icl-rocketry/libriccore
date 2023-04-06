@@ -14,7 +14,7 @@
 
 #include <string>
 
-#include "riccorelogging.h"
+#include <libriccore/riccorelogging.h>
 
 
 
@@ -25,7 +25,7 @@ class SystemStatus : public BitwiseFlagManager<SYSTEM_FLAGS_T>
     // check passed system_flags_t for default flags present
     
 public:
-    SystemStatus() : BitwiseFlagManager::BitwiseFlagManager(0)
+    SystemStatus() : BitwiseFlagManager<SYSTEM_FLAGS_T>::BitwiseFlagManager(0)
                      {};
 
 
@@ -37,26 +37,26 @@ public:
      */
     void newFlag(SYSTEM_FLAGS_T flag, std::string_view info)
     {
-        BitwiseFlagManager::newFlag(flag);
-        RicCoreLogging::log<LOGGING_TARGET>(getStatus(), static_cast<uint32_t>(flag), info);
+        BitwiseFlagManager<SYSTEM_FLAGS_T>::newFlag(flag);
+        RicCoreLogging::log<LOGGING_TARGET>(this->getStatus(), static_cast<uint32_t>(flag), info);
     };
 
     void newFlag(SYSTEM_FLAGS_T flag) override
     {
-        BitwiseFlagManager::newFlag(flag);
-        RicCoreLogging::log<LOGGING_TARGET>(getStatus(), static_cast<uint32_t>(flag), "flag raised");
+        BitwiseFlagManager<SYSTEM_FLAGS_T>::newFlag(flag);
+        RicCoreLogging::log<LOGGING_TARGET>(this->getStatus(), static_cast<uint32_t>(flag), "flag raised");
     };
 
-    void deleteFlag(RSYSTEM_FLAGS_T flag) override
+    void deleteFlag(SYSTEM_FLAGS_T flag) override
     {
-        BitwiseFlagManager::newFlag(flag);
-        RicCoreLogging::log<LOGGING_TARGET>(getStatus(), static_cast<uint32_t>(flag), "flag removed");
+        BitwiseFlagManager<SYSTEM_FLAGS_T>::newFlag(flag);
+        RicCoreLogging::log<LOGGING_TARGET>(this->getStatus(), static_cast<uint32_t>(flag), "flag removed");
     };
 
     void deleteFlag(SYSTEM_FLAGS_T flag, std::string_view info)
     {
-        BitwiseFlagManager::newFlag(flag);
-        RicCoreLogging::log<LOGGING_TARGETS>(getStatus(), static_cast<uint32_t>(flag), "flag removed");
+        BitwiseFlagManager<SYSTEM_FLAGS_T>::newFlag(flag);
+        RicCoreLogging::log<LOGGING_TARGET>(this->getStatus(), static_cast<uint32_t>(flag), "flag removed");
     };
 
 };

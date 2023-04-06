@@ -17,7 +17,7 @@
 #include "libriccore/systemstatus/systemstatus.h"
 
 
-#include "libriccore/util/millis_stub.h"
+#include <libriccore/platform/millis.h>
 
 template<typename SYSTEM_FLAGS_T>
 class State
@@ -30,7 +30,7 @@ public:
    * @param ID
    * @param systemstatus
    */
-  State(SYSTEM_FLAGS_T ID, SystemStatus<SYSTEM_FLAGS_T> systemstatus) : stateID(ID),
+  State(SYSTEM_FLAGS_T ID, SystemStatus<SYSTEM_FLAGS_T> &systemstatus) : stateID(ID),
                                                       _systemstatus(systemstatus){};
 
   virtual ~State(){};

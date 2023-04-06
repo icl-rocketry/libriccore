@@ -9,7 +9,7 @@
  */
 struct ILoggerHandler{
     private:
-        template<typename ...PLACEHOLDER> //placeholder required as RicCoreSystem is a template
+        template<typename P1,typename P2,typename P3> //placeholder required as RicCoreSystem is a template
         friend class RicCoreSystem;
 
 
