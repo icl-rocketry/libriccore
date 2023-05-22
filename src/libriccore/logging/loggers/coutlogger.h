@@ -33,7 +33,7 @@ public:
         if (!enabled){return;};
         
         #ifdef ARDUINO
-        Serial.println(logger_name.c_str() + ":[" + std::to_string(millis()).c_str() + "] -> "  + msg.c_str());
+        Serial.println((std::string(logger_name) + ":[" + std::to_string(millis()).c_str() + "] -> "  + std::string(msg)).c_str());
         #else
         std::cout << logger_name << ":[" + std::to_string(millis()) + "] -> " << msg << "\n";
         #endif

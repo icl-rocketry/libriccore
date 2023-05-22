@@ -10,7 +10,7 @@ endif()
 
 target_include_directories(libriccore INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 
-set_target_properties(libriccore PROPERTIES LINKER_LANGUAGE CXX)
+# set_target_properties(libriccore PROPERTIES LINKER_LANGUAGE CXX)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/libriccore/platform)
 target_link_libraries(libriccore INTERFACE platform)

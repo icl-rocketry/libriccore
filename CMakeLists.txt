@@ -2,8 +2,9 @@ cmake_minimum_required(VERSION 3.16.0)
 
 if (ESP_PLATFORM)
     set(LOCAL OFF)
-    idf_component_register()
+    idf_component_register(INCLUDE_DIRS src)
     #link any ESP-IDF required libraries here
+    return()
 else()
     option(LOCAL "Pick the ESP32 or DESKTOP (default)" ON)
 endif()
