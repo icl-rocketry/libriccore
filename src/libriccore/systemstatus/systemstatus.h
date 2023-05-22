@@ -49,14 +49,14 @@ public:
 
     void deleteFlag(SYSTEM_FLAGS_T flag) override
     {
-        BitwiseFlagManager<SYSTEM_FLAGS_T>::newFlag(flag);
+        BitwiseFlagManager<SYSTEM_FLAGS_T>::deleteFlag(flag);
         RicCoreLogging::log<LOGGING_TARGET>(this->getStatus(), static_cast<uint32_t>(flag), "flag removed");
     };
 
     void deleteFlag(SYSTEM_FLAGS_T flag, std::string_view info)
     {
-        BitwiseFlagManager<SYSTEM_FLAGS_T>::newFlag(flag);
-        RicCoreLogging::log<LOGGING_TARGET>(this->getStatus(), static_cast<uint32_t>(flag), "flag removed");
+        BitwiseFlagManager<SYSTEM_FLAGS_T>::deleteFlag(flag);
+        RicCoreLogging::log<LOGGING_TARGET>(this->getStatus(), static_cast<uint32_t>(flag), info);
     };
 
 };

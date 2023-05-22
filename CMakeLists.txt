@@ -1,18 +1,14 @@
 cmake_minimum_required(VERSION 3.16.0)
 
+if (ESP_PLATFORM)
+    set(LOCAL OFF)
+    idf_component_register()
+    #link any ESP-IDF required libraries here
+else()
+    option(LOCAL "Pick the ESP32 or DESKTOP (default)" ON)
+endif()
+
 project("libriccore" VERSION 1.0)
 
-add_library(libriccore INTERFACE)
-
-target_compile_options(libriccore INTERFACE -g)
-target_compile_options(libriccore INTERFACE -Wall)
-target_compile_options(libriccore INTERFACE -Wpedantic)
-target_compile_options(libriccore INTERFACE -O0) #TODO: should this be an option? Release/debug mode 
-# hmm, because this is being integrated into pio/espidf, it might be better to control it at a project level rather than the librayr level seeing as this lirary is interface
-target_compile_features(libriccore INTERFACE cxx_std_17)
-
+#include src
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/src/)
-target_link_libraries(libriccore INTERFACE source)
-
-# add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/include)
-option(LOCAL "Pick the ESP32 or DESKTOP (default)" ON)

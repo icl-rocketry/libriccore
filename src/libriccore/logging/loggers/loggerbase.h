@@ -1,7 +1,8 @@
 #pragma once
 
 /**
- * @brief Abstract interface for a logger in the loggerhandler. Note a logger maybe be constructed in a non initalized state 
+ * @brief Abstract interface for a logger in the loggerhandler. 
+ * NB a logger maybe be constructed in a non initalized state 
  * as the logger may depend on system objects which havent been constructed such as the storage manager.
  * 
  */

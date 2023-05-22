@@ -15,6 +15,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/uio.h>
+#include <termios.h>
 
 #include <libriccore/riccorelogging.h>
 
@@ -36,6 +37,20 @@ class VirtualSerialPort : public HardwareSerial
             }
             ptsDeviceName = ptsname(fileDescriptor);
 
+            // struct termios tty;
+            // if(tcgetattr(fileDescriptor, &tty) != 0) {
+            //     RicCoreLogging::log<RicCoreLoggingConfig::LOGGERS::SYS>("Error from tcgetattr");
+            // }
+            // //set baud
+            // cfsetispeed(&tty, baud);
+            // cfsetospeed(&tty, baud);   
+
+            // if (tcsetattr(fileDescriptor, TCSANOW, &tty) != 0) {
+            //     RicCoreLogging::log<RicCoreLoggingConfig::LOGGERS::SYS>("Error from tcsetattr");
+            // }
+            // ioctl(fileDescriptor,TIOCMBIS,TIOCM_RTS);
+            // ioctl(fileDescriptor,TIOCMBIS,TIOCM_DTR);
+
             RicCoreLogging::log<RicCoreLoggingConfig::LOGGERS::SYS>("Virtual serial port opened on " + ptsDeviceName);
         };
 
@@ -56,6 +71,7 @@ class VirtualSerialPort : public HardwareSerial
         {
             int numBytes;
             ioctl(fileDescriptor,FIONREAD,&numBytes);
+            RicCoreLogging::log<RicCoreLoggingConfig::LOGGERS::SYS>("VSP - " + std::to_string(numBytes));
             return (numBytes < 0) ? 0 : numBytes;
         };
         uint8_t read() override 
@@ -75,6 +91,7 @@ class VirtualSerialPort : public HardwareSerial
     private:
         int fileDescriptor;
         std::string ptsDeviceName;
+        static constexpr int baud = 115200;
 
         /**
          * @brief Hard limit of 1MB for file size for now

@@ -1,3 +1,5 @@
+
+
 //
 // Copyright (c) 2011 Christopher Baker <https://christopherbaker.net>
 // Copyright (c) 2011 Jacques Fortier <https://github.com/jacquesf/COBS-Consistent-Overhead-Byte-Stuffing>
@@ -5,6 +7,11 @@
 // SPDX-License-Identifier: MIT
 //
 
+/**
+ * @brief Modifed to use vectors instead of raw buffers
+ * @author Kiran de Silva
+ * 
+ */
 
 #pragma once
 
@@ -30,7 +37,7 @@
 /// \sa https://github.com/jacquesf/COBS-Consistent-Overhead-Byte-Stuffing
 /// \sa http://www.jacquesf.com/2011/03/consistent-overhead-byte-stuffing
 
-//Modifed to use vectors instead of raw buffers
+
 
 class COBS
 {

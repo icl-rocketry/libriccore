@@ -75,7 +75,7 @@ class MockSystem : public RicCoreSystem<MockSystem,MOCK_SYSTEM_FLAGS,MOCK_COMMAN
         
 
         void systemUpdate(){
-            RicCoreLogging::log<RicCoreLoggingConfig::LOGGERS::SYS>("derived system update called!");
+            // RicCoreLogging::log<RicCoreLoggingConfig::LOGGERS::SYS>("derived system update called!");
         }
 };
 
@@ -117,7 +117,8 @@ class State2 : public State<MOCK_SYSTEM_FLAGS>
 
 
 State1::State1():State(MOCK_SYSTEM_FLAGS::STATE_1,mocksystem.systemstatus){};
-std::unique_ptr<State<MOCK_SYSTEM_FLAGS>> State1::update(){return std::make_unique<State2>();};
+// std::unique_ptr<State<MOCK_SYSTEM_FLAGS>> State1::update(){return std::make_unique<State2>();};
+std::unique_ptr<State<MOCK_SYSTEM_FLAGS>> State1::update(){return nullptr;};
 State1::~State1(){};
 
 
@@ -133,11 +134,12 @@ void MockSystem::systemSetup()
 
 int main(){
     mocksystem.coreSystemSetup();
-    for (int i =0; i<5; i++){
+    while (true){
         mocksystem.coreSystemUpdate();
         // sleep(1);
-        RicCoreLogging::log<RicCoreLoggingConfig::LOGGERS::SYS>("tick");
-        std::cout<<std::endl;
+        // RicCoreLogging::log<RicCoreLoggingConfig::LOGGERS::SYS>("tick");
+        // std::cout<<std::endl;
+        std::cout<<std::flush;
     }
 
 }
