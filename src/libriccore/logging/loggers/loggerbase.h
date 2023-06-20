@@ -1,5 +1,8 @@
 #pragma once
 
+#include <stdint.h>
+
+
 /**
  * @brief Abstract interface for a logger in the loggerhandler. 
  * NB a logger maybe be constructed in a non initalized state 
@@ -9,18 +12,13 @@
 class LoggerBase{
     public:
 
+
         LoggerBase():
-        initalized(false),
+        initialized(false),
         enabled(true)
         {};
         
         ~LoggerBase(){};
-
-        /**
-         * @brief Perform any intialization required by the derived logger
-         * 
-         */
-        virtual void initialize(){};
 
         /**
          * @brief Enable the logger
@@ -42,8 +40,9 @@ class LoggerBase{
         virtual void update(){}; 
         
     
-    protected:
-        bool initalized;
+    public:
+        bool initialized;
         bool enabled;
+        
 
 };

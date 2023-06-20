@@ -26,7 +26,8 @@ class CoutLogger : public LoggerBase
 {
 public:
     CoutLogger(const std::string_view name) : LoggerBase(),
-                                              logger_name(name){};
+                                              logger_name(name){
+                                              };
 
     void log(std::string_view msg)
     {   
@@ -44,6 +45,7 @@ public:
         std::string log_str = std::to_string(flag) + "," + std::string(message) + "," + std::to_string(status);
         log(log_str);
     };
+
     
     ~CoutLogger(){};
 

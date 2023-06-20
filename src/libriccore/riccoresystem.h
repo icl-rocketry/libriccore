@@ -35,7 +35,7 @@ class RicCoreSystem{
                       HardwareSerial &uartDebugPort):
         systemstatus(),
         loggerhandler(ILoggerHandler::getInstance()),
-        networkmanager(static_cast<uint8_t>(DEFAULT_ADDRESS::NOADDRESS),NODETYPE::LEAF,true), //cant remember what happens if u intialize with address zero
+        networkmanager(254,NODETYPE::LEAF,true), //cant remember what happens if u intialize with address zero
         uart0(uartDebugPort,systemstatus,static_cast<uint8_t>(DEFAULT_INTERFACES::USBSERIAL),"UART0"),
         commandhandler(*(static_cast<DERIVED*>(this)),commandmap,static_cast<uint8_t>(DEFAULT_SERVICES::COMMAND),defaultEnabledCommands),
         statemachine()

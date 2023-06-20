@@ -45,7 +45,7 @@ class LoggerHandler{
          * @return constexpr auto 
          */
         template<RicCoreLoggingConfig::LOGGERS NAME>
-        constexpr auto retrieve_logger(){
+        constexpr auto& retrieve_logger(){
             return std::get<static_cast<int>(NAME)>(logger_list_tuple);
         }; 
 
@@ -63,9 +63,9 @@ class LoggerHandler{
         void update()
         {
             std::apply(
-                [](auto &logger) 
+                [](auto &&...loggers) 
                 {
-                    logger.update();
+                    (...,loggers.update());
                 },
                 logger_list_tuple);
         };
@@ -79,7 +79,7 @@ class LoggerHandler{
          * @brief Tuple containing configured loggers for the logger handler. Note this must be an inlined tuple.
          * 
          */
-        decltype(RicCoreLoggingConfig::logger_list) logger_list_tuple = RicCoreLoggingConfig::logger_list;
+        decltype(RicCoreLoggingConfig::logger_list)& logger_list_tuple = RicCoreLoggingConfig::logger_list;
         //check config is of type tuple
         static_assert(RicCoreUtil::is_tuple<decltype(RicCoreLoggingConfig::logger_list)>::value, "Logger list is not a tuple!");
 
