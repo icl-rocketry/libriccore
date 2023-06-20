@@ -11,6 +11,7 @@
  */
 #pragma once
 #include <cstdint>
+#include <memory>
 
 #include "commands/commandhandler.h"
 #include "systemstatus/systemstatus.h"
@@ -24,9 +25,10 @@
  * @tparam SYSTEM_FLAGS_T Enum of system flags
  * @tparam COMMAND_ID_ENUM Enum of Command IDs
  */
-template<typename SYSTEM_T,typename SYSTEM_FLAGS_T,typename COMMAND_ID_ENUM>
+template<typename SYSTEM_T,typename SYSTEM_FLAGS_T,typename COMMAND_ID_ENUM,size_t N_MAX_COMMANDS=256>
 struct RicCoreTypes{
-    using CommandHandler_t = CommandHandler<SYSTEM_T,COMMAND_ID_ENUM,256>;
+    using CommandHandler_t = CommandHandler<SYSTEM_T,COMMAND_ID_ENUM,N_MAX_COMMANDS>;
     using SystemStatus_t = SystemStatus<SYSTEM_FLAGS_T>;
     using State_t = State<SYSTEM_FLAGS_T>;
+    using State_ptr_t = std::unique_ptr<State_t>;
 };
