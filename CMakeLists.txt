@@ -2,7 +2,8 @@ cmake_minimum_required(VERSION 3.16.0)
 
 if (ESP_PLATFORM)
     set(LOCAL OFF)
-    idf_component_register(INCLUDE_DIRS src)
+    idf_component_register(INCLUDE_DIRS src
+                           REQUIRES librnp)
     #link any ESP-IDF required libraries here
     return()
 else()
