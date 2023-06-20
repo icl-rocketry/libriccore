@@ -16,7 +16,7 @@
 
 #include "state.h"
 
-template<typename SYSTEM_FLAG_T>
+template <typename SYSTEM_FLAG_T>
 class StateMachine
 {
 
@@ -30,8 +30,8 @@ public:
 
   /**
    * @brief Initalize state machine with inital state pointer
-   * 
-   * @param initialState 
+   *
+   * @param initialState
    */
   void initalize(std::unique_ptr<State<SYSTEM_FLAG_T>> initialState)
   {

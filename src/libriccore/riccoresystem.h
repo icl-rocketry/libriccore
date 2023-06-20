@@ -2,9 +2,9 @@
 #pragma once
 
 //From librnp
-#include <rnp_networkmanager.h>
-#include <rnp_default_address.h>
-#include <rnp_nvs_save.h>
+#include <librnp/rnp_networkmanager.h>
+#include <librnp/rnp_default_address.h>
+#include <librnp/rnp_nvs_save.h>
 
 #include "networkinterfaces/uart/uart.h"
 

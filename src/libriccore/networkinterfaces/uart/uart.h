@@ -7,9 +7,9 @@
 // esp specifc
 #include <libriccore/platform/HardwareSerial.h>
 // librnp
-#include "rnp_interface.h"
-#include "rnp_header.h"
-#include "rnp_packet.h"
+#include <librnp/rnp_interface.h>
+#include <librnp/rnp_header.h>
+#include <librnp/rnp_packet.h>
 //logging
 #include <libriccore/riccorelogging.h>
 

@@ -11,10 +11,12 @@
 #include <initializer_list>
 
 
-#include "rnp_packet.h"
-#include "rnp_networkmanager.h"
-#include "rnp_networkservice.h"
-#include <default_packets/simplecommandpacket.h>
+#include <librnp/rnp_networkservice.h>
+#include <librnp/rnp_networkmanager.h>
+#include <librnp/rnp_packet.h>
+
+
+#include <librnp/default_packets/simplecommandpacket.h>
 
 #include "libriccore/util/bitsethelpers.h"
 

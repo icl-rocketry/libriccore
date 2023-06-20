@@ -20,8 +20,8 @@
 #include <queue>
 #include <unordered_map>
 
-#include "rnp_interface.h"
-#include "rnp_packet.h"
+#include <librnp/rnp_interface.h>
+#include <librnp/rnp_packet.h>
 
 #include "driver/gpio.h"
 #include "driver/twai.h"
