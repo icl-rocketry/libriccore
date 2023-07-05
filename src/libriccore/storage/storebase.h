@@ -6,22 +6,17 @@
 #include <memory>
 #include <unordered_map>
 
-#include "platform/thread.h"
+#include "storetypes.h"
+#include "wrappedfile.h"
 
-using fd = uint32_t; // QUESTION: Maybe this can be smaller? - Realistically we're not even gonna have 255 files open at once
+#include <libriccore/platform/thread.h>
 
-class StoreBase;
-class WrappedFile;
+// using fd = uint32_t; // QUESTION: Maybe this can be smaller? - Realistically we're not even gonna have 255 files open at once
+
 
 enum class FILE_TYPE : uint8_t {
     FILE,
     DIRECTORY
-};
-
-enum class FILE_MODE : uint8_t {
-    READ,
-    WRITE,
-    RW
 };
 
 struct directory_element_t{
@@ -36,32 +31,6 @@ struct AppendRequest {
     bool* done;
 };
 
-class WrappedFile {
-public:
-    WrappedFile(FILE_MODE mode, StoreBase& store);
-
-    const fd file_desc;
-
-    // Send a request to the underlying store to store this
-    void append(const std::vector<char>& data, bool* done);
-
-    void read(std::vector<char>& dest);
-    void close(); // Should this be done automatically on delete?
-
-protected:
-    FILE_MODE mode;
-    StoreBase& store;
-
-private:
-    virtual void _read(std::vector<char>& dest) = 0;
-    virtual void _close() = 0;
-
-    //Write/Flush to the underlying file type
-    virtual void file_write(const std::vector<char>& data) = 0;
-    virtual void file_flush() = 0;
-
-friend StoreBase;
-};
 
 
 class StoreBase {
@@ -71,7 +40,7 @@ public:
     ~StoreBase() {
         done = true;
         has_work.up(); // Just incase the other thread is sleeping
-        t.join();
+        // t.join(); join is called automaticlaly in destructor of thread class
     }
 
     bool ls(std::vector<directory_element_t> &directory_structure) {
@@ -84,13 +53,13 @@ public:
         return device_lock;
     }
 
-    std::unique_ptr<WrappedFile> open(std::string path, FILE_MODE mode);
+    std::unique_ptr<WrappedFile> open(std::string path, FILE_MODE mode = FILE_MODE::RW);
     bool ls(std::string path, std::vector<directory_element_t> &directory_structure);
     bool mkdir(std::string path);
     bool remove(std::string path); // Removes a file or an empty directory
 
-    fd get_next_fd();
-    void release_fd(fd file_desc);
+    store_fd get_next_fd();
+    void release_fd(store_fd file_desc);
 
 protected:
     // This is a reference to another lock in case several devices share a bus
@@ -104,11 +73,11 @@ private:
     virtual bool _mkdir(std::string path) = 0;
     virtual bool _remove(std::string path) = 0; // Removes a file or an empty directory
 
-    std::unordered_map<fd, Channel<AppendRequest>> queues;
+    std::unordered_map<store_fd, Channel<AppendRequest>> queues;
 
     void flush_task(void*);
     Thread t;
     Semaphore has_work;
-    fd file_desc;
+    store_fd file_desc;
     bool done;
 };

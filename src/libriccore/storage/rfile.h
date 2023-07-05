@@ -3,12 +3,15 @@
 #include <vector>
 #include <memory>
 #include <initializer_list>
-#include "store_base.h"
+
+#include "storebase.h"
+#include "storetype.h"
+#include "wrappedfile.h"
 
 // Replicated File, 1 file replicated on n stores
 class RFile {
 public:
-    RFile(std::string path, FILE_MODE mode, std::initializer_list<StoreBase&> stores) {
+    RFile(std::string path, std::initializer_list<StoreBase&> stores, FILE_MODE mode = FILE_MODE::RW) {
         for (auto s : stores) {
             auto file = s.open(path, mode);
             files.push_back(std::move(file));

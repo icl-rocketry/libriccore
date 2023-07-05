@@ -1,75 +1,90 @@
 #pragma once
 #include <string>
+#include <function>
 #include "config.h"
 
 /**
  * Thread manages creation and deletion
  * Once a thread object is constructed, it is launched.
  * When the destructor is called, the thread will also be deleted
-*/
-class Thread {
+ */
+class Thread
+{
 public:
     Thread(
-        void (*f)(void* args),
-        void* args,
+        std::function<void(void*)>,
+        void *args,
         size_t stack_size = 0,
         int priority = 0,
-        std::string name = ""
-    );
+        std::string name = "");
 
     ~Thread();
+
 
 private:
     config::ThreadHandleType handle;
     bool success;
 };
 
-class Lock {
+class Lock
+{
 public:
     Lock();
     void acquire();
     void release();
+
 private:
     config::LockType lock;
 };
 
-class ScopedLock {
+class ScopedLock
+{
 public:
-    ScopedLock(Lock& l) : l(l) {
+    ScopedLock(Lock &l) : l(l)
+    {
         l.acquire();
     }
-    ~ScopedLock() {
+    ~ScopedLock()
+    {
         l.release();
     }
+
 private:
-    Lock& l;
+    Lock &l;
 };
 
 // A thread safe queue
 template <typename T>
-class Channel {
+class Channel
+{
 public:
-    void send(T item) {
+    void send(T item)
+    {
         channel.send(item);
     }
-    
-    void receive(T& dest) {
+
+    void receive(T &dest)
+    {
         channel.receive(dest);
     }
 
-    bool empty() {
+    bool empty()
+    {
         return channel.empty();
     }
+
 private:
     config::ChannelType<T> channel;
 };
 
 // This is a binary semaphore
-class Semaphore {
+class Semaphore
+{
 public:
     void up();
     void down();
     bool get();
+
 private:
     config::SemaType sema;
 };

@@ -1,27 +1,5 @@
-#include "store_base.h"
+#include "storebase.h"
 #include <iostream>
-
-WrappedFile::WrappedFile(FILE_MODE mode, StoreBase& store) : mode(mode), store(store), file_desc(store.get_next_fd()) {}
-
-void WrappedFile::append(const std::vector<char>& data, bool* done) {
-    AppendRequest req{&data, this, done};
-    store.append(*this,  req);
-}
-
-void WrappedFile::read(std::vector<char>& dest) {
-    if (mode == FILE_MODE::WRITE) {
-        throw std::runtime_error("Cannot read from a writeonly file");
-    }
-    ScopedLock sl(store.get_lock());
-    _read(dest);
-}
-
-void WrappedFile::close() {
-    store.release_fd(file_desc);
-    
-    ScopedLock sl(store.get_lock());
-    _close();
-}
 
 std::unique_ptr<WrappedFile> StoreBase::open(std::string path, FILE_MODE mode) {
     ScopedLock sl(device_lock);
@@ -81,8 +59,8 @@ void StoreBase::flush_task(void* args) {
     }
 }
 
-fd StoreBase::get_next_fd() {
-    fd desc = file_desc++;
+store_fd StoreBase::get_next_fd() {
+    store_fd desc = file_desc++;
 
     ScopedLock sl(thread_lock);
     queues.emplace(std::piecewise_construct,
@@ -91,7 +69,7 @@ fd StoreBase::get_next_fd() {
     return desc;
 }
 
-void StoreBase::release_fd(fd file_desc) {
+void StoreBase::release_fd(store_fd file_desc) {
     // Make sure all pending writes have been written
     thread_lock.acquire();
     while (!queues.at(file_desc).empty()) {

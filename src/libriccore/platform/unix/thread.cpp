@@ -4,8 +4,9 @@
 #include <chrono>
 #include <mutex>
 #include <memory>
+#include <functional>
 
-Thread::Thread(void (*f)(void* args), void* args, size_t stack_size, int priority, std::string name) {
+Thread::Thread(std::function<void(void*)> f, void* args, size_t stack_size, int priority, std::string name) {
     std::thread thread(f, args);
     handle = std::move(thread);
     success = true;
