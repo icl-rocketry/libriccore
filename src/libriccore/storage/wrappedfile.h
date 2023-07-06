@@ -34,6 +34,8 @@ public:
     void read(std::vector<char> &dest);
     void close(); // Should this be done automatically on delete?
 
+    virtual ~WrappedFile();
+
 protected:
     FILE_MODE mode;
     StoreBase &store;

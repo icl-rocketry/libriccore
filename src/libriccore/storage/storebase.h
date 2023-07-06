@@ -35,7 +35,12 @@ struct AppendRequest {
 
 class StoreBase {
 public:
-    StoreBase(Lock& device_lock) : device_lock(device_lock), t((void (*)(void* args)) &StoreBase::flush_task, (void*) this), done(false), file_desc(0) {}
+    StoreBase(Lock &device_lock) : device_lock(device_lock),
+                                   t([this](void *arg)
+                                     { this->StoreBase::flush_task(arg); },
+                                     reinterpret_cast<void *>(this)),
+                                   file_desc(0),
+                                   done(false) {}
 
     ~StoreBase() {
         done = true;
@@ -75,7 +80,7 @@ private:
 
     std::unordered_map<store_fd, Channel<AppendRequest>> queues;
 
-    void flush_task(void*);
+    void flush_task(void* args);
     Thread t;
     Semaphore has_work;
     store_fd file_desc;
