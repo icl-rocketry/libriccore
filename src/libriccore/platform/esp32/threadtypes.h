@@ -5,7 +5,7 @@
 #include <atomic>
 
 // This file is used to specify base types for general headers
-namespace config {
+namespace ThreadTypes {
     using ThreadHandleType = std::thread;
     using LockType = std::mutex;
     

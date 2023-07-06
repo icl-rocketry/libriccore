@@ -2,4 +2,3 @@ bin/
 tmp/
 .DS_Store
 build/
-lib/

@@ -1,7 +1,12 @@
 #pragma once
 #include <string>
 #include <functional>
-#include "config.h"
+
+#ifdef LIBRICCORE_UNIX
+    #include "unix/threadtypes.h"
+#else
+    #include "esp32/threadtypes.h"
+#endif
 
 /**
  * Thread manages creation and deletion
@@ -22,7 +27,7 @@ public:
 
 
 private:
-    config::ThreadHandleType handle;
+    ThreadTypes::ThreadHandleType handle;
     bool success;
 };
 
@@ -34,7 +39,7 @@ public:
     void release();
 
 private:
-    config::LockType lock;
+    ThreadTypes::LockType lock;
 };
 
 class ScopedLock
@@ -74,7 +79,7 @@ public:
     }
 
 private:
-    config::ChannelType<T> channel;
+    ThreadTypes::ChannelType<T> channel;
 };
 
 // This is a binary semaphore
@@ -86,7 +91,7 @@ public:
     bool get();
 
 private:
-    config::SemaType sema;
+    ThreadTypes::SemaType sema;
 };
 
 void delay(uint32_t ms);
