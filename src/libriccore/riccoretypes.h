@@ -21,7 +21,7 @@
  * @brief Templated struct with type aliases inside to provide convient type access. Some of the template paramters might require
  * forward declaration to prevent cylic dependancies.
  * 
- * @tparam SYSTEM_T type of derived system class, likely needs to be forward declared
+ * @tparam SYSTEM_T type of derived system class. This will almost always be forward declared
  * @tparam SYSTEM_FLAGS_T Enum of system flags
  * @tparam COMMAND_ID_ENUM Enum of Command IDs
  */

@@ -6,8 +6,13 @@
 #include <memory>
 #include <functional>
 
-Thread::Thread(std::function<void(void*)> f, void* args, size_t stack_size, int priority, std::string name) {
-    std::thread thread(f, args);
+Thread::Thread(std::function<void(void*)> f_ptr, void* args,const size_t stack_size,const int priority,const CORE_ID coreID, std::string_view name) {
+    
+    if (coreID > CORE_ID::ANYCORE){
+        throw std::runtime_error("Illegal Core specified!");
+    }
+
+    std::thread thread(f_ptr, args);
     handle = std::move(thread);
     success = true;
 }

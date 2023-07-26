@@ -1,4 +1,7 @@
 #pragma once
+
+#include <freertos/task.h>
+
 #include <thread>
 #include <mutex>
 #include <queue>
@@ -6,7 +9,8 @@
 
 // This file is used to specify base types for general headers
 namespace ThreadTypes {
-    using ThreadHandleType = std::thread;
+    using ThreadHandleType = TaskHandle_t;
+    
     using LockType = std::mutex;
     
     // Can replace this with a binary_semaphore in cpp20
