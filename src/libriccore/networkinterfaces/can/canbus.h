@@ -26,8 +26,8 @@
 #include "driver/gpio.h"
 #include "driver/twai.h"
 
-#include "riccorelogging.h"
-#include "systemstatus/systemstatus.h"
+#include <libriccore/riccorelogging.h>
+#include <libriccore/systemstatus/systemstatus.h>
 
 #include "rnpcanidentifier.h"
 
@@ -88,7 +88,7 @@ public:
     {
         if ((data.header.size() + data.header.packet_len) > _info.MTU)
         {
-            _RicCoreLogging::log<LOGGING_TARGET>("Packet Exceeds Can MTU!");
+            RicCoreLogging::log<LOGGING_TARGET>("Packet Exceeds Can MTU!");
             return;
         }
         if (_sendBuffer.size() + 1 > _info.maxSendBufferElements)
@@ -202,7 +202,7 @@ private:
 
         if (!(can_packet.flags & TWAI_MSG_FLAG_EXTD))
         {
-            _RicCoreLogging::log<LOGGING_TARGET>("Bad Can Packet Type, Packet Dumped!");
+            RicCoreLogging::log<LOGGING_TARGET>("Bad Can Packet Type, Packet Dumped!");
             return;
         }
         // decode identifier
@@ -336,7 +336,7 @@ private:
             {
                 // can tx buffer full, dont increment seg_id and try to place on buffer next update
 
-                _RicCoreLogging::log<LOGGING_TARGET>("Can tx buffer full");
+                RicCoreLogging::log<LOGGING_TARGET>("Can tx buffer full");
                 return;
             }
             // proper error might be worth throwing here? -> future
