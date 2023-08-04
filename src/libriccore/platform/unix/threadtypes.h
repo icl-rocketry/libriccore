@@ -4,13 +4,15 @@
 #include <queue>
 #include <atomic>
 
+#include <libriccore/storage/appendrequest.h>
+
 // This file is used to specify base types for general headers
 namespace ThreadTypes {
     using ThreadHandleType = std::thread;
     using LockType = std::mutex;
     
     // Can replace this with a binary_semaphore in cpp20
-    class SemaType {
+    class Semaphore {
     public:
         void up() {
             counter = true;
@@ -29,20 +31,28 @@ namespace ThreadTypes {
         std::atomic_bool counter;
     };
 
-    // We don't have a thread safe queue in STL apparently
-    // Cba with fine grained locking so here we go
-    template <typename T>
-    class ChannelType {
+    /**
+     * @brief Threadsafe channel which manages unique ptrs
+     * 
+     * @tparam T 
+     */
+    template<typename T>
+    class UniquePtrChannel {
     public:
-        void send(T item) {
+
+        void send(std::unique_ptr<T> item) {
             auto l = std::scoped_lock(lock);
-            vec.push(item);
+            vec.push(std::move(item));
         }
-        void receive(T& dest) {
+
+        std::unique_ptr<T> pop()
+        {
             auto l = std::scoped_lock(lock);
-            dest = std::move(vec.front());
+            std::unique_ptr<T> ret = std::move(vec.front());
             vec.pop();
+            return ret;
         }
+     
         bool empty() {
             auto l = std::scoped_lock(lock);
             return vec.empty();
@@ -50,6 +60,6 @@ namespace ThreadTypes {
     
     private:
         std::mutex lock;
-        std::queue<T> vec;
+        std::queue<std::unique_ptr<T>> vec;
     };
 }

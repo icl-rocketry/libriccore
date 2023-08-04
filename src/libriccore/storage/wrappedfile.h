@@ -28,10 +28,31 @@ class WrappedFile
 public:
     WrappedFile(StoreBase &store,FILE_MODE mode = FILE_MODE::RW);
 
-    // Send a request to the underlying store to store this
-    void append(const std::vector<char> &data, bool *done);
 
-    void read(std::vector<char> &dest);
+    /**
+     * @brief Send a request to the underlying store to store this
+     * 
+     * @param data data to write to file, this will invalidate the provided vector 
+     * @param done pointer to bool to indicate when write to file is complete
+     */
+    void append(std::vector<uint8_t> &data, bool *done);
+
+    /**
+     * @brief Sends a request to unerlying store to store this, however preserves the provided std vector by
+     * copying this data out. 
+     * 
+     * @param data const reference to vector
+     * @param done pointer to bool to indicate when write is complete
+     */
+    void appendCopy(const std::vector<uint8_t> &data, bool *done);
+
+    /**
+     * @brief Threadsafe read to destination
+     * 
+     * @param dest 
+     */
+    void read(std::vector<uint8_t> &dest);
+
     void close(); // Should this be done automatically on delete?
 
     virtual ~WrappedFile();
@@ -43,11 +64,11 @@ protected:
     const store_fd file_desc;
 
 private:
-    virtual void _read(std::vector<char> &dest) = 0;
+    virtual void _read(std::vector<uint8_t> &dest) = 0;
     virtual void _close() = 0;
 
     // Write/Flush to the underlying file type
-    virtual void file_write(const std::vector<char> &data) = 0;
+    virtual void file_write(const std::vector<uint8_t> &data) = 0;
     virtual void file_flush() = 0;
 
     friend StoreBase;

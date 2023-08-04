@@ -8,6 +8,7 @@
 
 #include "storetypes.h"
 #include "wrappedfile.h"
+#include "appendrequest.h"
 
 #include <libriccore/platform/thread.h>
 
@@ -23,12 +24,6 @@ struct directory_element_t{
     std::string name;
     uint32_t size;
     FILE_TYPE type;
-};
-
-struct AppendRequest {
-    const std::vector<char>* data; //Must be nullable
-    WrappedFile* file;
-    bool* done;
 };
 
 
@@ -52,7 +47,7 @@ public:
         return ls("/", directory_structure);
     }
 
-    void append(WrappedFile& file, AppendRequest r);
+    void append(std::unique_ptr<AppendRequest> request_ptr);
 
     Lock& get_lock() {
         return device_lock;
@@ -78,11 +73,11 @@ private:
     virtual bool _mkdir(std::string path) = 0;
     virtual bool _remove(std::string path) = 0; // Removes a file or an empty directory
 
-    std::unordered_map<store_fd, Channel<AppendRequest>> queues;
+    std::unordered_map<store_fd, ThreadTypes::UniquePtrChannel<AppendRequest>> queues;
 
     void flush_task(void* args);
     Thread t;
-    Semaphore has_work;
+    ThreadTypes::Semaphore has_work;
     store_fd file_desc;
     bool done;
 };

@@ -29,8 +29,8 @@ public:
     }
 
 protected:
-    void _read(std::vector<char>& dest) override{
-        file.read(dest.data(), dest.size());
+    void _read(std::vector<uint8_t>& dest) override{
+        file.read((char*)dest.data(), dest.size());
     }
     
     void _close() override{
@@ -40,8 +40,8 @@ protected:
 private:
     std::fstream file;
 
-    void file_write(const std::vector<char>& data) override{
-        file.write(data.data(), data.size());
+    void file_write(const std::vector<uint8_t>& data) override{
+        file.write((char*)data.data(), data.size());
     }
     void file_flush() override{
         file.flush();
@@ -108,7 +108,7 @@ int main() {
     auto file = s.open("./tmp/asdf.txt", FILE_MODE::WRITE);
 
     std::string str = "hello world\n";
-    std::vector<char> vec(str.begin(), str.end());
+    std::vector<uint8_t> vec(str.begin(), str.end());
     bool done;
 
     file->append(vec, &done);

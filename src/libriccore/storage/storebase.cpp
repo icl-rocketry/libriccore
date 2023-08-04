@@ -1,5 +1,8 @@
 #include "storebase.h"
 #include <iostream>
+#include "appendrequest.h"
+
+#include <memory>
 
 std::unique_ptr<WrappedFile> StoreBase::open(std::string path, FILE_MODE mode) {
     ScopedLock sl(device_lock);
@@ -21,31 +24,37 @@ bool StoreBase::remove(std::string path) {
     return _remove(path); // QUESTION: Should this close the file automatically?
 }
 
-void StoreBase::append(WrappedFile& file, AppendRequest r) {
-    queues.at(file.file_desc).send(r);
+void StoreBase::append(std::unique_ptr<AppendRequest> request_ptr) { 
+    //std::move to transfer ownershp of the append request to the queue
+    queues.at(request_ptr->file->file_desc).send(std::move(request_ptr));
     has_work.up(); //Must have sequential consistency (guarantee that the up happens after the channel send)
 }
 
 void StoreBase::flush_task(void* args) {
-    AppendRequest req;
+    std::unique_ptr<AppendRequest> req;
     WrappedFile* file;
     
     while (true) {
         has_work.down();
-        thread_lock.acquire();
+        thread_lock.acquire(); // locks the queues container
         for (auto& [file_desc, queue] : queues) {
             bool pending_flush = false;
             file = nullptr; // Make sure we don't accidentally write to the wrong file
+            //need to verify that the file still exists using the fd
             
             while (!queue.empty()) {
-                queue.receive(req);
-                file = req.file;
+
+                req = std::move(queue.pop());
+
+                file = req->file;
+
                 {
                     ScopedLock l(device_lock);
-                    file->file_write(*req.data);
+                    file->file_write(req->data);
                 }
-                if (req.done != nullptr) {
-                    *req.done = true;
+
+                if (req->done != nullptr) {
+                    *(req->done) = true;
                 }
                 pending_flush = true;
             }
