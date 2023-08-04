@@ -12,7 +12,6 @@
 
 #include <libriccore/platform/thread.h>
 
-// using fd = uint32_t; // QUESTION: Maybe this can be smaller? - Realistically we're not even gonna have 255 files open at once
 
 
 enum class FILE_TYPE : uint8_t {
@@ -27,21 +26,11 @@ struct directory_element_t{
 };
 
 
-
 class StoreBase {
 public:
-    StoreBase(Lock &device_lock) : device_lock(device_lock),
-                                   t([this](void *arg)
-                                     { this->StoreBase::flush_task(arg); },
-                                     reinterpret_cast<void *>(this)),
-                                   file_desc(0),
-                                   done(false) {}
+    StoreBase(Lock &device_lock);
 
-    ~StoreBase() {
-        done = true;
-        has_work.up(); // Just incase the other thread is sleeping
-        // t.join(); join is called automaticlaly in destructor of thread class
-    }
+    ~StoreBase();
 
     bool ls(std::vector<directory_element_t> &directory_structure) {
         return ls("/", directory_structure);
@@ -77,7 +66,7 @@ private:
 
     void flush_task(void* args);
     Thread t;
-    ThreadTypes::Semaphore has_work;
+    ThreadTypes::ThreadWorkSemaphore has_work;
     store_fd file_desc;
-    bool done;
+    std::atomic<bool> done;
 };

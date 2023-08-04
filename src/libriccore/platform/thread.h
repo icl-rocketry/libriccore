@@ -3,11 +3,11 @@
 #include <functional>
 
 
-// #ifdef LIBRICCORE_UNIX
-//     #include "unix/threadtypes.h"
-// #else
-//     #include "esp32/threadtypes.h"
-// #endif
+#ifdef LIBRICCORE_UNIX
+    #include "unix/threadtypes.h"
+#else
+    // #include "esp32/threadtypes.h"
+#endif
 
 #include "unix/threadtypes.h"
 

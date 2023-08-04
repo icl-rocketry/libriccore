@@ -11,8 +11,11 @@ namespace ThreadTypes {
     using ThreadHandleType = std::thread;
     using LockType = std::mutex;
     
-    // Can replace this with a binary_semaphore in cpp20
-    class Semaphore {
+    /**
+     * @brief Provides a semaphore which checks if a thread has work, otherwise the thread yields/sleeps
+     * 
+     */
+    class ThreadWorkSemaphore {
     public:
         void up() {
             counter = true;

@@ -4,6 +4,19 @@
 
 #include <memory>
 
+StoreBase::StoreBase(Lock &device_lock) : device_lock(device_lock),
+                                          t([this](void *arg)
+                                            { this->StoreBase::flush_task(arg); },
+                                            reinterpret_cast<void *>(this)),
+                                          file_desc(0),
+                                          done(false) {}
+
+StoreBase::~StoreBase()
+{
+    done = true;
+    has_work.up(); // Just incase the other thread is sleeping
+}
+
 std::unique_ptr<WrappedFile> StoreBase::open(std::string path, FILE_MODE mode) {
     ScopedLock sl(device_lock);
     return _open(path, mode);
@@ -35,7 +48,7 @@ void StoreBase::flush_task(void* args) {
     WrappedFile* file;
     
     while (true) {
-        has_work.down();
+        has_work.down(); // this yields the thread
         thread_lock.acquire(); // locks the queues container
         for (auto& [file_desc, queue] : queues) {
             bool pending_flush = false;
