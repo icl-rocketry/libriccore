@@ -212,6 +212,7 @@ private:
                 else
                 {
                     // buffer overflow, dump buffer
+                    
                     _receiveBuffer.clear();
                     _info.receiveBufferOverflow = true;
                     _systemstatus.newFlag(SYSTEM_FLAGS_T::ERROR_SERIAL, "StreamSerial Receive Buffer Overflow!");
