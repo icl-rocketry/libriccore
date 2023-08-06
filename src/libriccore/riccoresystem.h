@@ -6,7 +6,7 @@
 #include <librnp/rnp_default_address.h>
 #include <librnp/rnp_nvs_save.h>
 
-#include "networkinterfaces/uart/uart.h"
+#include "networkinterfaces/serial/streamserial.h"
 
 #include "fsm/statemachine.h"
 
@@ -19,7 +19,8 @@
 
 #include "util/isdetected.h"
 
-#include "platform/HardwareSerial.h"
+// #include "platform/HardwareSerial.h"
+#include <iostream>
 
 template<typename DERIVED,
          typename SYSTEM_FLAGS_T,
@@ -32,11 +33,11 @@ class RicCoreSystem{
     public:
         RicCoreSystem(typename CommandHandler<DERIVED,COMMAND_ID_ENUM,256>::commandMap_t commandmap,
                       const std::initializer_list<COMMAND_ID_ENUM> defaultEnabledCommands,
-                      HardwareSerial &uartDebugPort):
+                      Stream &usbDebugPort):
         systemstatus(),
         loggerhandler(ILoggerHandler::getInstance()),
         networkmanager(254,NODETYPE::LEAF,true), //cant remember what happens if u intialize with address zero
-        uart0(uartDebugPort,systemstatus,static_cast<uint8_t>(DEFAULT_INTERFACES::USBSERIAL),"UART0"),
+        usb0(usbDebugPort,systemstatus,static_cast<uint8_t>(DEFAULT_INTERFACES::USBSERIAL),"usb0"),
         commandhandler(*(static_cast<DERIVED*>(this)),commandmap,static_cast<uint8_t>(DEFAULT_SERVICES::COMMAND),defaultEnabledCommands),
         statemachine()
         {};
@@ -82,7 +83,7 @@ class RicCoreSystem{
 
         RnpNetworkManager networkmanager;
 
-        UART<SYSTEM_FLAGS_T> uart0;
+        StreamSerial<SYSTEM_FLAGS_T> usb0;
 
         CommandHandler<DERIVED,COMMAND_ID_ENUM,256> commandhandler;
 
@@ -101,7 +102,7 @@ class RicCoreSystem{
             networkmanager.setLogCb([](const std::string& message){RicCoreLogging::log<RicCoreLoggingConfig::LOGGERS::SYS>(message);});
 
             // register debug interface
-            networkmanager.addInterface(&uart0);
+            networkmanager.addInterface(&usb0);
 
             //generate default network routes in the routing table
             networkmanager.generateDefaultRoutes();            

@@ -1,11 +1,20 @@
+/**
+ * @file streamserial.h
+ * @author Kiran de Silva (kd619@ic.ac.uk)
+ * @brief Network interface to support any serial device which implements the stream interface 
+ * @version 0.1
+ * @date 2023-08-06
+ * 
+ * @copyright Copyright (c) 2023
+ * 
+ */
 #pragma once
 // stl
 #include <memory>
 #include <vector>
 #include <array>
 #include <string>
-// esp specifc
-#include <libriccore/platform/HardwareSerial.h>
+#include <iostream>
 // librnp
 #include <librnp/rnp_interface.h>
 #include <librnp/rnp_header.h>
@@ -19,7 +28,7 @@
 
 
 
-struct UARTInterfaceInfo : public RnpInterfaceInfo
+struct StreamSerialInterfaceInfo : public RnpInterfaceInfo
 {
     size_t sendBufferSize;
     bool sendBufferOverflow;
@@ -28,13 +37,13 @@ struct UARTInterfaceInfo : public RnpInterfaceInfo
 };
 
 template <typename SYSTEM_FLAGS_T,RicCoreLoggingConfig::LOGGERS LOGGING_TARGET = RicCoreLoggingConfig::LOGGERS::SYS>
-class UART : public RnpInterface
+class StreamSerial : public RnpInterface
 {
 
 public:
-    UART(HardwareSerial &serial, SystemStatus<SYSTEM_FLAGS_T> &systemstatus, uint8_t id = static_cast<uint8_t>(DEFAULT_INTERFACES::USBSERIAL), std::string name = "UART0"):
+    StreamSerial(Stream &stream, SystemStatus<SYSTEM_FLAGS_T> &systemstatus, uint8_t id = static_cast<uint8_t>(DEFAULT_INTERFACES::USBSERIAL), std::string name = "StreamSerial0"):
      RnpInterface(id, name),
-    _serial(serial),
+    _stream(stream),
     _systemstatus(systemstatus)
     {
         _info.MTU = 256;
@@ -46,13 +55,13 @@ public:
     };
 
     /**
-     * @brief Setup the UART interface, as we don't own the serial interface, we leave setup to be performed externally to the UART interface.
+     * @brief Setup the StreamSerial interface, as we don't own the serial interface, we leave setup to be performed externally to the StreamSerial interface.
      * @author Kiran de Silva
      */
     void setup() override{};
 
     /**
-     * @brief Sends RNP packet over UART interface. The packet is serialzied into bytes, COBS encoded and then sent over the serial interface.
+     * @brief Sends RNP packet over StreamSerial interface. The packet is serialzied into bytes, COBS encoded and then sent over the serial interface.
      * @author Kiran de Silva
      * @param data reference to RnpPacket
      */
@@ -68,7 +77,7 @@ public:
         if (dataSize + _sendBuffer.size() > _info.sendBufferSize)
         {
             // not enough space
-            _systemstatus.newFlag(SYSTEM_FLAGS_T::ERROR_SERIAL, "UART Send Buffer Overflow!");
+            _systemstatus.newFlag(SYSTEM_FLAGS_T::ERROR_SERIAL, "StreamSerial Send Buffer Overflow!");
             ++_info.txerror;
             return;
         }
@@ -100,10 +109,10 @@ public:
 
 private:
     /**
-     * @brief Reference to the hardware serial interface
+     * @brief Reference to the stream interface
      * 
      */
-    HardwareSerial &_serial;
+    Stream &_stream;
     
     /**
      * @brief Reference to the system status object
@@ -115,7 +124,7 @@ private:
      * @brief Interface info struct
      * 
      */
-    UARTInterfaceInfo _info;
+    StreamSerialInterfaceInfo _info;
 
    
   
@@ -134,18 +143,33 @@ private:
         }
         // _serial.write(_sendBuffer.data(),_sendBuffer.size());
         // _sendBuffer.clear();
-        const size_t numBytes = _serial.availableForWrite();
-        if (numBytes < _sendBuffer.size())
+        // const size_t numBytes = _serial.availableForWrite();
+
+        const size_t to_send = _sendBuffer.size();
+        //this returns the actual number of bytes written
+        const size_t numBytes = _stream.write(_sendBuffer.data(),to_send);
+        const size_t leftover = to_send-numBytes;
+
+        if(leftover)
         {
-            _serial.write(_sendBuffer.data(), numBytes);
             _sendBuffer.erase(_sendBuffer.begin(), _sendBuffer.begin() + numBytes); // remove the sent data
         }
-        else if (numBytes >= _sendBuffer.size())
+        else
         {
-            _serial.write(_sendBuffer.data(), _sendBuffer.size());
             _sendBuffer.clear();
-            // maybe shrink to fit vector?
         }
+
+        // if (numBytes < _sendBuffer.size())
+        // {
+        //     // _serial.write(_sendBuffer.data(), numBytes);
+        //     _sendBuffer.erase(_sendBuffer.begin(), _sendBuffer.begin() + numBytes); // remove the sent data
+        // }
+        // else if (numBytes >= _sendBuffer.size())
+        // {
+        //     _serial.write(_sendBuffer.data(), _sendBuffer.size());
+        //     _sendBuffer.clear();
+        //     // maybe shrink to fit vector?
+        // }
     };
 
     /**
@@ -157,9 +181,9 @@ private:
     void getPackets()
     {
 
-        while (_serial.available() > 0)
+        while (_stream.available() > 0)
         {
-            uint8_t incomming = _serial.read();
+            uint8_t incomming = _stream.read();
             if (_packetBuffer == nullptr)
             {
                 continue; // avoid processing overhead of COBS if we cant store the packet anywhere so read out the packet
@@ -190,7 +214,7 @@ private:
                     // buffer overflow, dump buffer
                     _receiveBuffer.clear();
                     _info.receiveBufferOverflow = true;
-                    _systemstatus.newFlag(SYSTEM_FLAGS_T::ERROR_SERIAL, "UART Receive Buffer Overflow!");
+                    _systemstatus.newFlag(SYSTEM_FLAGS_T::ERROR_SERIAL, "StreamSerial Receive Buffer Overflow!");
                 }
             }
         }
