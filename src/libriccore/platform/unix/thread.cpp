@@ -6,7 +6,7 @@
 #include <memory>
 #include <functional>
 
-Thread::Thread(std::function<void(void*)> f_ptr, void* args,const size_t stack_size,const int priority,const CORE_ID coreID, std::string_view name) {
+RicCoreThread::Thread::Thread(std::function<void(void*)> f_ptr, void* args,const size_t stack_size,const int priority,const CORE_ID coreID, std::string_view name) {
     
     if (coreID > CORE_ID::ANYCORE){
         throw std::runtime_error("Illegal Core specified!");
@@ -17,22 +17,22 @@ Thread::Thread(std::function<void(void*)> f_ptr, void* args,const size_t stack_s
     success = true;
 }
 
-Thread::~Thread() {
+RicCoreThread::Thread::~Thread() {
     handle.join();
 }
 
-Lock::Lock() {}
+RicCoreThread::Lock::Lock() {}
 
-void Lock::acquire() {
+void RicCoreThread::Lock::acquire() {
     lock.lock();
 }
 
-void Lock::release() {
+void RicCoreThread::Lock::release() {
     lock.unlock();
 }
 
 
-void delay(uint32_t ms) {
+void RicCoreThread::delay(uint32_t ms) {
     std::this_thread::sleep_for(std::chrono::milliseconds(ms));
 }
 

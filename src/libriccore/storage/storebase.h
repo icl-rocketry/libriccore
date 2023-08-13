@@ -28,7 +28,7 @@ struct directory_element_t{
 
 class StoreBase {
 public:
-    StoreBase(Lock &device_lock);
+    StoreBase(RicCoreThread::Lock &device_lock);
 
     ~StoreBase();
 
@@ -38,7 +38,7 @@ public:
 
     void append(std::unique_ptr<AppendRequest> request_ptr);
 
-    Lock& get_lock() {
+    RicCoreThread::Lock& get_lock() {
         return device_lock;
     }
 
@@ -57,9 +57,9 @@ public:
 
 protected:
     // This is a reference to another lock in case several devices share a bus
-    Lock& device_lock; // Use this when performing operations on the device e.g. file write
+    RicCoreThread::Lock& device_lock; // Use this when performing operations on the device e.g. file write
 
-    Lock thread_lock; // Use this when updating shared internal state e.g. the queues map
+    RicCoreThread::Lock thread_lock; // Use this when updating shared internal state e.g. the queues map
 
 private:
     virtual std::unique_ptr<WrappedFile> _open(std::string path, FILE_MODE mode) = 0;
@@ -76,7 +76,7 @@ private:
     
 
     void flush_task(void* args);
-    Thread t;
+    RicCoreThread::Thread t;
     ThreadTypes::ThreadWorkSemaphore has_work;
     store_fd file_desc;
     std::atomic<bool> done;

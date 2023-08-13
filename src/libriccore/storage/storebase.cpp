@@ -4,7 +4,9 @@
 
 #include <memory>
 
-StoreBase::StoreBase(Lock &device_lock) : device_lock(device_lock),
+
+
+StoreBase::StoreBase(RicCoreThread::Lock &device_lock) : device_lock(device_lock),
                                           t([this](void *arg)
                                             { this->StoreBase::flush_task(arg); },
                                             reinterpret_cast<void *>(this)),
@@ -19,22 +21,22 @@ StoreBase::~StoreBase()
 }
 
 std::unique_ptr<WrappedFile> StoreBase::open(std::string path, FILE_MODE mode) {
-    ScopedLock sl(device_lock);
+    RicCoreThread::ScopedLock sl(device_lock);
     return _open(path, mode);
 }
 
 bool StoreBase::ls(std::string path, std::vector<directory_element_t> &directory_structure) {
-    ScopedLock sl(device_lock);
+    RicCoreThread::ScopedLock sl(device_lock);
     return _ls(path, directory_structure);
 }
 
 bool StoreBase::mkdir(std::string path) {
-    ScopedLock sl(device_lock);
+    RicCoreThread::ScopedLock sl(device_lock);
     return _mkdir(path);
 }
 
 bool StoreBase::remove(std::string path) {
-    ScopedLock sl(device_lock);
+    RicCoreThread::ScopedLock sl(device_lock);
     return _remove(path); // QUESTION: Should this close the file automatically?
 }
 
@@ -50,10 +52,7 @@ void StoreBase::flush_task(void* args) {
     WrappedFile* file;
     
     while (true) {
-         // semaphore forces current thread to yield allowing other threads to process data
-         //please take a peek at the implementation of this in threadtypes.h
-         //trust me it will make alot more sense how this flush_task actually works ./kds
-        // has_work.down();
+        //yield thread while there is no work
         has_work.waitForWork();
         thread_lock.acquire(); // locks the queues container
 
@@ -71,7 +70,7 @@ void StoreBase::flush_task(void* args) {
                 file = req->file;
 
                 {
-                    ScopedLock l(device_lock);
+                    RicCoreThread::ScopedLock l(device_lock);
                     //call underlying write to file
                     file->file_write(req->data);
                 }
@@ -80,19 +79,25 @@ void StoreBase::flush_task(void* args) {
             }
 
             if (pending_flush) { // file can't be nullptr here implicitly
+            //process flush at the end to try and take advatnage of multi-block writes
+            //only really works if the underlying storage system supports this
                 file->file_flush();
             }
         }
+        //update semaphore that work is done
         has_work.down();
+        //release store thread lock
         thread_lock.release();
         if (done) break;
     }
 }
 
 store_fd StoreBase::get_next_fd() {
+    //generate new file descriptor, increment desc as system lifetime is unlikely going to exceed the number of files allocated
     store_fd desc = file_desc++;
 
-    ScopedLock sl(thread_lock);
+    RicCoreThread::ScopedLock sl(thread_lock);
+    //consturct append channel in the queues container
     queues.emplace(std::piecewise_construct,
                     std::forward_as_tuple(desc),
                     std::forward_as_tuple());
@@ -104,7 +109,7 @@ void StoreBase::release_fd(store_fd file_desc) {
     thread_lock.acquire();
     while (!queues.at(file_desc).empty()) {
         thread_lock.release();
-        delay(20); // Give flush_task some time to acquire the lock
+        RicCoreThread::delay(20); // Give flush_task some time to acquire the lock
         thread_lock.acquire();
     }
 

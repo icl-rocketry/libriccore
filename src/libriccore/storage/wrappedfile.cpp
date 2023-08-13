@@ -29,13 +29,13 @@ void WrappedFile::read(std::vector<uint8_t>& dest) {
     if (mode == FILE_MODE::WRITE) {
         throw std::runtime_error("Cannot read from a writeonly file!");
     }
-    ScopedLock sl(store.get_lock());
+    RicCoreThread::ScopedLock sl(store.get_lock());
     _read(dest);
 }
 
 void WrappedFile::close() {
     store.release_fd(file_desc);
     
-    ScopedLock sl(store.get_lock());
+    RicCoreThread::ScopedLock sl(store.get_lock());
     _close();
 }
