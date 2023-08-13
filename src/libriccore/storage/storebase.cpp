@@ -15,6 +15,7 @@ StoreBase::~StoreBase()
 {
     done = true;
     has_work.up(); // Just incase the other thread is sleeping
+    // need to 'wait' for thread to die here with a join like method
 }
 
 std::unique_ptr<WrappedFile> StoreBase::open(std::string path, FILE_MODE mode) {
@@ -41,6 +42,7 @@ void StoreBase::append(std::unique_ptr<AppendRequest> request_ptr) {
     //std::move to transfer ownershp of the append request to the queue
     queues.at(request_ptr->file->file_desc).send(std::move(request_ptr));
     has_work.up(); //Must have sequential consistency (guarantee that the up happens after the channel send)
+    
 }
 
 void StoreBase::flush_task(void* args) {
@@ -48,27 +50,32 @@ void StoreBase::flush_task(void* args) {
     WrappedFile* file;
     
     while (true) {
-        has_work.down(); // this yields the thread
+         // semaphore forces current thread to yield allowing other threads to process data
+         //please take a peek at the implementation of this in threadtypes.h
+         //trust me it will make alot more sense how this flush_task actually works ./kds
+        // has_work.down();
+        has_work.waitForWork();
         thread_lock.acquire(); // locks the queues container
+
+        //iterate thru every queue in the queues container for each file, and process any pending writes
         for (auto& [file_desc, queue] : queues) {
             bool pending_flush = false;
             file = nullptr; // Make sure we don't accidentally write to the wrong file
             //need to verify that the file still exists using the fd
             
             while (!queue.empty()) {
-
-                req = std::move(queue.pop());
-
+                
+                //take 'ownership' of the first append request and remove from the queue
+                req = std::move(queue.pop());   
+                //update the file pointer to the request file
                 file = req->file;
 
                 {
                     ScopedLock l(device_lock);
+                    //call underlying write to file
                     file->file_write(req->data);
                 }
 
-                if (req->done != nullptr) {
-                    *(req->done) = true;
-                }
                 pending_flush = true;
             }
 
@@ -76,6 +83,7 @@ void StoreBase::flush_task(void* args) {
                 file->file_flush();
             }
         }
+        has_work.down();
         thread_lock.release();
         if (done) break;
     }

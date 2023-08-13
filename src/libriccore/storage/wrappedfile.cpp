@@ -11,18 +11,18 @@ WrappedFile::WrappedFile(StoreBase& store, FILE_MODE mode) : mode(mode), store(s
 
 WrappedFile::~WrappedFile(){};
 
-void WrappedFile::append(std::vector<uint8_t>& data, bool* done) {
+void WrappedFile::append(std::vector<uint8_t>& data) {
     if (mode == FILE_MODE::READ){
         throw std::runtime_error("Cannot write to readonly file!");
     } 
 
-    store.append(std::make_unique<AppendRequest>(std::move(data),this,done));
+    store.append(std::make_unique<AppendRequest>(std::move(data),this));
 }
 
-void WrappedFile::appendCopy(const std::vector<uint8_t> &data, bool* done)
+void WrappedFile::appendCopy(const std::vector<uint8_t> &data)
 {
     std::vector<uint8_t> data_copy(data);
-    append(data_copy,done);
+    append(data_copy);
 }
 
 void WrappedFile::read(std::vector<uint8_t>& dest) {

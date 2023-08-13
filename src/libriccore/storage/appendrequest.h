@@ -22,21 +22,25 @@ struct AppendRequest
      */
     WrappedFile* file;
     /**
-     * @brief Pointer to flag to indicate write complete
+     * @brief Explicit const reference constructor with copy
      * 
+     * @param data 
+     * @param file 
      */
-    bool* done;
-
-    AppendRequest(const std::vector<uint8_t>& data,WrappedFile* file,bool* done):
+    AppendRequest(const std::vector<uint8_t>& data,WrappedFile* file):
     data(data),
-    file(file),
-    done(done)
+    file(file)
     {};
 
-    AppendRequest(std::vector<uint8_t>& data,WrappedFile* file,bool* done):
+    /**
+     * @brief Explict non-const reference constructor implementing move semantics
+     * 
+     * @param data 
+     * @param file 
+     */
+    AppendRequest(std::vector<uint8_t>& data,WrappedFile* file):
     data(std::move(data)),
-    file(file),
-    done(done)
+    file(file)
     {};
     
 

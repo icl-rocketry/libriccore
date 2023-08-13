@@ -111,9 +111,13 @@ int main() {
     std::vector<uint8_t> vec(str.begin(), str.end());
     bool done;
 
-    file->append(vec, &done);
+    file->appendCopy(vec);
+    file->appendCopy(vec);
+    file->appendCopy(vec);
+    file->appendCopy(vec);
+    file->appendCopy(vec);
 
-    while (!done) {
+    while (s.pendingWrites()) {
         std::cout << "waiting" << std::endl;
     }
 

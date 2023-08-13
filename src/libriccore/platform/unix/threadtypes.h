@@ -17,19 +17,27 @@ namespace ThreadTypes {
      */
     class ThreadWorkSemaphore {
     public:
+
         void up() {
             counter = true;
         }
-        void down() {
+
+        void waitForWork()
+        {
             while (!counter) {
                 std::this_thread::yield(); // Do something else;
             }
+        }
+
+        void down() {
+            
             counter = false;
         }
 
         bool get() {
             return counter.load();
         }
+        
     private:
         std::atomic_bool counter;
     };

@@ -33,18 +33,16 @@ public:
      * @brief Send a request to the underlying store to store this
      * 
      * @param data data to write to file, this will invalidate the provided vector 
-     * @param done pointer to bool to indicate when write to file is complete
      */
-    void append(std::vector<uint8_t> &data, bool *done);
+    void append(std::vector<uint8_t> &data);
 
     /**
      * @brief Sends a request to unerlying store to store this, however preserves the provided std vector by
      * copying this data out. 
      * 
      * @param data const reference to vector
-     * @param done pointer to bool to indicate when write is complete
      */
-    void appendCopy(const std::vector<uint8_t> &data, bool *done);
+    void appendCopy(const std::vector<uint8_t> &data);
 
     /**
      * @brief Threadsafe read to destination

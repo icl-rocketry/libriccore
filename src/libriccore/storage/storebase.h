@@ -42,6 +42,11 @@ public:
         return device_lock;
     }
 
+    bool pendingWrites()
+    {
+        return has_work.get();
+    }
+
     std::unique_ptr<WrappedFile> open(std::string path, FILE_MODE mode = FILE_MODE::RW);
     bool ls(std::string path, std::vector<directory_element_t> &directory_structure);
     bool mkdir(std::string path);
@@ -62,7 +67,13 @@ private:
     virtual bool _mkdir(std::string path) = 0;
     virtual bool _remove(std::string path) = 0; // Removes a file or an empty directory
 
+    /**
+     * @brief map of queues to flie descriptors
+     * 
+     */
     std::unordered_map<store_fd, ThreadTypes::UniquePtrChannel<AppendRequest>> queues;
+
+    
 
     void flush_task(void* args);
     Thread t;
