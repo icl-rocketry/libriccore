@@ -84,7 +84,8 @@ public:
         SIMPLE = 0,
         MAGCAL = 10,
         MESSAGE_RESPONSE = 100,
-        TELEMETRY_RESPONSE = 101
+        TELEMETRY_RESPONSE = 101,
+        LMQTELEMETRY_RESPONSE = 102
     };
 
     /**
