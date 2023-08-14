@@ -9,7 +9,10 @@
 
 WrappedFile::WrappedFile(StoreBase& store, FILE_MODE mode) : mode(mode), store(store), file_desc(store.get_next_fd()) {}
 
-WrappedFile::~WrappedFile(){};
+WrappedFile::~WrappedFile()
+{
+    WrappedFile::close(true);
+};
 
 void WrappedFile::append(std::vector<uint8_t>& data) {
     if (mode == FILE_MODE::READ){
@@ -33,8 +36,8 @@ void WrappedFile::read(std::vector<uint8_t>& dest) {
     _read(dest);
 }
 
-void WrappedFile::close() {
-    store.release_fd(file_desc);
+void WrappedFile::close(bool force) {
+    store.release_fd(file_desc,force);
     
     RicCoreThread::ScopedLock sl(store.get_lock());
     _close();

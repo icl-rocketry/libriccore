@@ -1,10 +1,10 @@
 #include "storebase.h"
 #include <iostream>
-#include "appendrequest.h"
-
 #include <memory>
 
+#include <libriccore/riccorelogging.h>
 
+#include "appendrequest.h"
 
 StoreBase::StoreBase(RicCoreThread::Lock &device_lock) : device_lock(device_lock),
                                           t([this](void *arg)
@@ -43,7 +43,9 @@ bool StoreBase::remove(std::string path) {
 void StoreBase::append(std::unique_ptr<AppendRequest> request_ptr) { 
     //std::move to transfer ownershp of the append request to the queue
     queues.at(request_ptr->file->file_desc).send(std::move(request_ptr));
-    has_work.up(); //Must have sequential consistency (guarantee that the up happens after the channel send)
+    has_work.up(); 
+    
+    //Must have sequential consistency (guarantee that the up happens after the channel send)
     
 }
 
@@ -104,13 +106,16 @@ store_fd StoreBase::get_next_fd() {
     return desc;
 }
 
-void StoreBase::release_fd(store_fd file_desc) {
+void StoreBase::release_fd(store_fd file_desc,bool force) {
     // Make sure all pending writes have been written
     thread_lock.acquire();
+    
+    if (!force){
     while (!queues.at(file_desc).empty()) {
         thread_lock.release();
-        RicCoreThread::delay(20); // Give flush_task some time to acquire the lock
+        RicCoreThread::delay(1); // Give flush_task some time to acquire the lock
         thread_lock.acquire();
+    }
     }
 
     queues.erase(file_desc);

@@ -10,6 +10,7 @@
 #include <libriccore/storage/storebase.h>
 #include <libriccore/storage/wrappedfile.h>
 
+using namespace RicCoreThread;
 
 class UnixWrappedFile : public WrappedFile {
 public:

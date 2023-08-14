@@ -22,11 +22,18 @@ namespace ThreadTypes {
         void up() {
             counter = true;
         }
-        void down() {
+
+        void waitForWork()
+        {
             while (!counter) {
                 vTaskDelay(1); //sleep the thread rather than yield, as yielding from a higher priority task
                 //will not allow lower priority tasks to take over
             }
+        }
+
+
+        void down() 
+        { 
             counter = false;
         }
 

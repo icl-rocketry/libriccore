@@ -51,7 +51,12 @@ public:
      */
     void read(std::vector<uint8_t> &dest);
 
-    void close(); // Should this be done automatically on delete?
+    /**
+     * @brief Automatically called in destructor
+     * 
+     * @param force force closes file by erasing append queue, potential data loss
+     */
+    void close(bool force); 
 
     virtual ~WrappedFile();
 

@@ -3,12 +3,12 @@
 #include <functional>
 
 #ifdef LIBRICCORE_UNIX
-#include "unix/threadtypes.h"
+#include "unix/riccorethread_types.h"
 #else
-// #include "esp32/threadtypes.h"
+// #include "esp32/riccorethread_types.h"
 #endif
 
-#include "unix/threadtypes.h"
+#include "unix/riccorethread_types.h"
 
 namespace RicCoreThread
 {
@@ -53,7 +53,7 @@ namespace RicCoreThread
         ~Thread();
 
     private:
-        ThreadTypes::ThreadHandleType handle;
+        ThreadHandle_t handle;
         bool success;
     };
 
@@ -65,7 +65,7 @@ namespace RicCoreThread
         void release();
 
     private:
-        ThreadTypes::LockType lock;
+        Lock_t lock;
     };
 
     class ScopedLock
@@ -84,6 +84,46 @@ namespace RicCoreThread
         Lock &l;
     };
 
+    /**
+     * @brief Thread delay function
+     * 
+     * @param ms 
+     */
     void delay(uint32_t ms);
+
+    /**
+     * @brief Provides a semaphore which checks if a thread has work, otherwise the thread yields/sleeps
+     *
+     */
+    class ThreadWorkSemaphore
+    {
+    public:
+        /**
+         * @brief Signal semaphore up
+         * 
+         */
+        void up();
+        /**
+         * @brief Idle thread until semaphore is up, thread yielding is platform specific.
+         * 
+         */
+        void waitForWork();
+        /**
+         * @brief Signal semaphore down
+         * 
+         */
+        void down();
+
+        /**
+         * @brief Get current state of semaphore
+         * 
+         * @return true 
+         * @return false 
+         */
+        bool get();
+
+    private:
+        std::atomic_bool counter;
+    };
 
 };
