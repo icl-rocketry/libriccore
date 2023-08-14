@@ -12,9 +12,12 @@ target_include_directories(libriccore INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 
 # set_target_properties(libriccore PROPERTIES LINKER_LANGUAGE CXX)
 
+<<<<<<< HEAD
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/libriccore/platform)
 target_link_libraries(libriccore INTERFACE platform)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/libriccore/storage)
 target_link_libraries(libriccore INTERFACE storage)
 
+=======
+>>>>>>> 8b3b7fb (restructured how platform specific stubs will be included into library. look at the millis stub for an example)

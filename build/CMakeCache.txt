@@ -227,6 +227,27 @@ CMAKE_VERBOSE_MAKEFILE:BOOL=FALSE
 
 //Pick the ESP32 or DESKTOP (default)
 LOCAL:BOOL=ON
+<<<<<<< HEAD
+=======
+
+//Value Computed by CMake
+Project_BINARY_DIR:STATIC=/Users/kiran/Documents/Projects/ICLR/libriccore/build
+
+//Value Computed by CMake
+Project_IS_TOP_LEVEL:STATIC=ON
+
+//Value Computed by CMake
+Project_SOURCE_DIR:STATIC=/Users/kiran/Documents/Projects/ICLR/libriccore
+
+//Value Computed by CMake
+librcicore_BINARY_DIR:STATIC=/Users/kiran/Documents/Projects/ICLR/libriccore/build
+
+//Value Computed by CMake
+librcicore_IS_TOP_LEVEL:STATIC=ON
+
+//Value Computed by CMake
+librcicore_SOURCE_DIR:STATIC=/Users/kiran/Documents/Projects/ICLR/libriccore
+>>>>>>> 8b3b7fb (restructured how platform specific stubs will be included into library. look at the millis stub for an example)
 
 //Value Computed by CMake
 libriccore_BINARY_DIR:STATIC=/Users/kiran/Documents/Projects/ICLR/libriccore/build

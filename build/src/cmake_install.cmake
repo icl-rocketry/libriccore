@@ -35,6 +35,7 @@ endif()
 # Set default install directory permissions.
 if(NOT DEFINED CMAKE_OBJDUMP)
   set(CMAKE_OBJDUMP "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/objdump")
+<<<<<<< HEAD
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
@@ -45,5 +46,7 @@ endif()
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
   include("/Users/kiran/Documents/Projects/ICLR/Ricardo-OS-Template/components/libriccore/build/src/libriccore/storage/cmake_install.cmake")
+=======
+>>>>>>> 8b3b7fb (restructured how platform specific stubs will be included into library. look at the millis stub for an example)
 endif()
 
