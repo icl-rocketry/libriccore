@@ -140,11 +140,11 @@ private:
      * @brief map of queues to flie descriptors
      * 
      */
-    std::unordered_map<store_fd, ThreadTypes::UniquePtrChannel<AppendRequest>> queues; 
+    std::unordered_map<store_fd, RicCoreThread::UniquePtrChannel<AppendRequest>> queues; 
 
     void flush_task(void* args);
     RicCoreThread::Thread t;
-    ThreadTypes::ThreadWorkSemaphore has_work;
+    RicCoreThread::ThreadWorkSemaphore has_work;
     store_fd file_desc;
     std::atomic<bool> done;
 };

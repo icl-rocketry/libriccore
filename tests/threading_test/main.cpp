@@ -5,7 +5,7 @@
 #include <memory>
 #include <exception>
 
-#include <libriccore/platform/thread.h>
+#include <libriccore/platform/riccorethread.h>
 
 #include <libriccore/storage/storebase.h>
 #include <libriccore/storage/wrappedfile.h>
