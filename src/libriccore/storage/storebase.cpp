@@ -108,14 +108,19 @@ store_fd StoreBase::get_next_fd() {
 
 void StoreBase::release_fd(store_fd file_desc,bool force) {
     // Make sure all pending writes have been written
+    if (!queues.count(file_desc)){
+        //return if file_desc no longer exists in the queues
+        return;
+    }
     thread_lock.acquire();
     
     if (!force){
-    while (!queues.at(file_desc).empty()) {
-        thread_lock.release();
-        RicCoreThread::delay(1); // Give flush_task some time to acquire the lock
-        thread_lock.acquire();
-    }
+        while (!queues.at(file_desc).empty()) 
+        {
+            thread_lock.release();
+            RicCoreThread::delay(1); // Give flush_task some time to acquire the lock
+            thread_lock.acquire();
+        }
     }
 
     queues.erase(file_desc);

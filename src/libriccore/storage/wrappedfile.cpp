@@ -11,7 +11,7 @@ WrappedFile::WrappedFile(StoreBase& store, FILE_MODE mode) : mode(mode), store(s
 
 WrappedFile::~WrappedFile()
 {
-    WrappedFile::close(true);
+   store.release_fd(file_desc,true);
 };
 
 void WrappedFile::append(std::vector<uint8_t>& data) {
@@ -41,4 +41,5 @@ void WrappedFile::close(bool force) {
     
     RicCoreThread::ScopedLock sl(store.get_lock());
     _close();
+    
 }

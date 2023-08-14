@@ -28,7 +28,9 @@ public:
         };
         file = std::fstream(path, f_mode);
     }
-
+    ~UnixWrappedFile(){
+        _close();
+    }
 protected:
     void _read(std::vector<uint8_t>& dest) override{
         file.read((char*)dest.data(), dest.size());
