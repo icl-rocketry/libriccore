@@ -5,7 +5,7 @@
 #include <memory>
 #include <exception>
 
-#include <libriccore/platform/riccorethread.h>
+#include <libriccore/threading/riccorethread.h>
 
 #include <libriccore/storage/storebase.h>
 #include <libriccore/storage/wrappedfile.h>
@@ -53,7 +53,7 @@ private:
 
 class UnixStore : public StoreBase {
 public:
-    UnixStore(Lock& device_lock) : StoreBase(device_lock) {}
+    UnixStore(Lock_t& device_lock) : StoreBase(device_lock) {}
 
 protected:
     std::unique_ptr<WrappedFile> _open(std::string path, FILE_MODE mode) {
@@ -91,7 +91,7 @@ protected:
 
 
 int main() {
-    Lock l;
+    Lock_t l;
     UnixStore s(l);
     
     if (s.mkdir("./tmp/")) {

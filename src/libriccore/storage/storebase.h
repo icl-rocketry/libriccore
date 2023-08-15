@@ -10,7 +10,8 @@
 #include "wrappedfile.h"
 #include "appendrequest.h"
 
-#include <libriccore/platform/riccorethread.h>
+#include <libriccore/threading/riccorethread.h>
+#include <libriccore/threading/uniqueptrchannel.h>
 
 
 
@@ -28,7 +29,7 @@ struct directory_element_t{
 
 class StoreBase {
 public:
-    StoreBase(RicCoreThread::Lock &device_lock);
+    StoreBase(RicCoreThread::Lock_t &device_lock);
 
     ~StoreBase();
 
@@ -46,9 +47,9 @@ public:
     /**
      * @brief Get the underlying device lock
      * 
-     * @return RicCoreThread::Lock& 
+     * @return RicCoreThread::Lock_t& 
      */
-    RicCoreThread::Lock& get_lock() {
+    RicCoreThread::Lock_t& get_lock() {
         return device_lock;
     }
 
@@ -60,7 +61,7 @@ public:
      */
     bool pendingWrites()
     {
-        return has_work.get();
+        return has_work.load();
     }
 
     /**
@@ -122,13 +123,13 @@ protected:
      * Use this when performing operations on the device e.g. file write
      * 
      */
-    RicCoreThread::Lock& device_lock;
+    RicCoreThread::Lock_t& device_lock;
 
     /**
      * @brief Use this when updating shared internal state e.g. the queues map
      * 
      */
-    RicCoreThread::Lock thread_lock; 
+    RicCoreThread::Lock_t thread_lock; 
 
 private:
     virtual std::unique_ptr<WrappedFile> _open(std::string path, FILE_MODE mode) = 0;
@@ -144,7 +145,7 @@ private:
 
     void flush_task(void* args);
     RicCoreThread::Thread t;
-    RicCoreThread::ThreadWorkSemaphore has_work;
+    std::atomic<bool> has_work;
     store_fd file_desc;
     std::atomic<bool> done;
 };

@@ -4,9 +4,13 @@
 
 #include <libriccore/riccorelogging.h>
 
+#include <libriccore/threading/riccorethread.h>
+#include <libriccore/threading/uniqueptrchannel.h>
+#include <libriccore/threading/scopedlock.h>
+
 #include "appendrequest.h"
 
-StoreBase::StoreBase(RicCoreThread::Lock &device_lock) : device_lock(device_lock),
+StoreBase::StoreBase(RicCoreThread::Lock_t &device_lock) : device_lock(device_lock),
                                           t([this](void *arg)
                                             { this->StoreBase::flush_task(arg); },
                                             reinterpret_cast<void *>(this)),
@@ -16,7 +20,7 @@ StoreBase::StoreBase(RicCoreThread::Lock &device_lock) : device_lock(device_lock
 StoreBase::~StoreBase()
 {
     done = true;
-    has_work.up(); // Just incase the other thread is sleeping
+    has_work = true; // Just incase the other thread is sleeping
     // need to 'wait' for thread to die here with a join like method
 }
 
@@ -43,7 +47,7 @@ bool StoreBase::remove(std::string path) {
 void StoreBase::append(std::unique_ptr<AppendRequest> request_ptr) { 
     //std::move to transfer ownershp of the append request to the queue
     queues.at(request_ptr->file->file_desc).send(std::move(request_ptr));
-    has_work.up(); 
+    has_work = true; 
     
     //Must have sequential consistency (guarantee that the up happens after the channel send)
     
@@ -55,7 +59,10 @@ void StoreBase::flush_task(void* args) {
     
     while (true) {
         //yield thread while there is no work
-        has_work.waitForWork();
+        while(!has_work)
+        {
+            RicCoreThread::block();
+        }
         thread_lock.acquire(); // locks the queues container
 
         //iterate thru every queue in the queues container for each file, and process any pending writes
@@ -87,7 +94,7 @@ void StoreBase::flush_task(void* args) {
             }
         }
         //update semaphore that work is done
-        has_work.down();
+        has_work = false;
         //release store thread lock
         thread_lock.release();
         if (done) break;

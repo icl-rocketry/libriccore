@@ -9,19 +9,18 @@
  * @copyright Copyright (c) 2023
  * 
  */
-#include <thread>
-#include <mutex>
-#include <queue>
-#include <atomic>
 
 
-#include "unix_lock.h"
+
+#include <freertos/task.h>
+
+#include "freertos_lock.h"
 
 // This file is used to specify base types for general headers
 namespace RicCoreThread
 {
-    using ThreadHandle_t = std::thread;
+    using ThreadHandle_t = TaskHandle_t;
 
-    using Lock_t = Unix_Lock;
+    using Lock_t = FreeRTOS_Lock;
 
 };
