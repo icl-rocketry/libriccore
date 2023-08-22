@@ -59,6 +59,7 @@ namespace RicCoreThread
     private:
         ThreadHandle_t handle;
         bool success;
+        
     };
 
     /**

@@ -14,7 +14,7 @@ using namespace RicCoreThread;
 
 class UnixWrappedFile : public WrappedFile {
 public:
-    UnixWrappedFile(std::string path, FILE_MODE mode, StoreBase& store) : WrappedFile(store,mode) {
+    UnixWrappedFile(std::string_view path, FILE_MODE mode, StoreBase& store) : WrappedFile(store,mode) {
         auto f_mode = std::fstream::in;
         switch (mode) {
         case FILE_MODE::READ:
@@ -56,11 +56,11 @@ public:
     UnixStore(Lock_t& device_lock) : StoreBase(device_lock) {}
 
 protected:
-    std::unique_ptr<WrappedFile> _open(std::string path, FILE_MODE mode) {
+    std::unique_ptr<WrappedFile> _open(std::string_view path, FILE_MODE mode) {
         return std::make_unique<UnixWrappedFile>(path, mode, *this);
     }
 
-    bool _ls(std::string path, std::vector<directory_element_t> &directory_structure) {
+    bool _ls(std::string_view path, std::vector<directory_element_t> &directory_structure) {
         if (!std::filesystem::exists(path)) return false;
 
         for (const auto& entry : std::filesystem::directory_iterator(path)) {
@@ -79,12 +79,12 @@ protected:
         }
         return true;
     }
-    bool _mkdir(std::string path) {
+    bool _mkdir(std::string_view path) {
         return std::filesystem::create_directory(path);
     }
 
     // Removes a file or an empty directory
-    bool _remove(std::string path) {
+    bool _remove(std::string_view path) {
         return std::filesystem::remove(path);
     }
 };

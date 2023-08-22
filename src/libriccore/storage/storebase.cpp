@@ -1,6 +1,7 @@
 #include "storebase.h"
 #include <iostream>
 #include <memory>
+#include <exception>
 
 #include <libriccore/riccorelogging.h>
 
@@ -11,9 +12,14 @@
 #include "appendrequest.h"
 
 StoreBase::StoreBase(RicCoreThread::Lock_t &device_lock) : device_lock(device_lock),
-                                          t([this](void *arg)
-                                            { this->StoreBase::flush_task(arg); },
-                                            reinterpret_cast<void *>(this)),
+                                            _storeState(STATE::NOMINAL),
+                                          flush_thread(
+                                            [this](void *arg){this->StoreBase::flush_task(arg);},
+                                            reinterpret_cast<void *>(this),
+                                            2000,
+                                            1,
+                                            RicCoreThread::Thread::CORE_ID::CORE0,
+                                            "flushtask"),
                                           file_desc(0),
                                           done(false) {}
 
@@ -24,31 +30,51 @@ StoreBase::~StoreBase()
     // need to 'wait' for thread to die here with a join like method
 }
 
-std::unique_ptr<WrappedFile> StoreBase::open(std::string path, FILE_MODE mode) {
+std::unique_ptr<WrappedFile> StoreBase::open(std::string_view path, FILE_MODE mode) {
+    if (_storeState != STATE::NOMINAL)
+    {
+        return nullptr;
+    }
     RicCoreThread::ScopedLock sl(device_lock);
     return _open(path, mode);
 }
 
-bool StoreBase::ls(std::string path, std::vector<directory_element_t> &directory_structure) {
+bool StoreBase::ls(std::string_view path, std::vector<directory_element_t> &directory_structure) {
+    if (_storeState != STATE::NOMINAL)
+    {
+        return false;
+    }
     RicCoreThread::ScopedLock sl(device_lock);
     return _ls(path, directory_structure);
 }
 
-bool StoreBase::mkdir(std::string path) {
+bool StoreBase::mkdir(std::string_view path) {
+    if (_storeState != STATE::NOMINAL)
+    {
+        return false;
+    }
     RicCoreThread::ScopedLock sl(device_lock);
     return _mkdir(path);
 }
 
-bool StoreBase::remove(std::string path) {
+bool StoreBase::remove(std::string_view path) {
+    if (_storeState != STATE::NOMINAL)
+    {
+        return false;
+    }
     RicCoreThread::ScopedLock sl(device_lock);
     return _remove(path); // QUESTION: Should this close the file automatically?
 }
 
-void StoreBase::append(std::unique_ptr<AppendRequest> request_ptr) { 
+bool StoreBase::append(std::unique_ptr<AppendRequest> request_ptr) { 
     //std::move to transfer ownershp of the append request to the queue
+    if (_storeState != STATE::NOMINAL)
+    {
+        return false;
+    }
     queues.at(request_ptr->file->file_desc).send(std::move(request_ptr));
     has_work = true; 
-    
+    return true;
     //Must have sequential consistency (guarantee that the up happens after the channel send)
     
 }
@@ -63,11 +89,18 @@ void StoreBase::flush_task(void* args) {
         {
             RicCoreThread::block();
         }
+
+        if (_storeState != STATE::NOMINAL){
+            continue; // skip writing queues if store is not nominal
+        }
+
         thread_lock.acquire(); // locks the queues container
 
         //iterate thru every queue in the queues container for each file, and process any pending writes
         for (auto& [file_desc, queue] : queues) {
             bool pending_flush = false;
+            bool error = false;
+
             file = nullptr; // Make sure we don't accidentally write to the wrong file
             //need to verify that the file still exists using the fd
             
@@ -81,17 +114,49 @@ void StoreBase::flush_task(void* args) {
                 {
                     RicCoreThread::ScopedLock l(device_lock);
                     //call underlying write to file
-                    file->file_write(req->data);
+                    try{
+                        file->file_write(req->data);
+                    } catch (WrappedFile::WriteException& e)
+                    {
+                        error = true;
+                        _storeState = STATE::ERROR_WRITE;
+                        break;
+                    }
                 }
 
                 pending_flush = true;
             }
 
-            if (pending_flush) { // file can't be nullptr here implicitly
+            if (pending_flush && !error) 
+            { // file can't be nullptr here implicitly
             //process flush at the end to try and take advatnage of multi-block writes
             //only really works if the underlying storage system supports this
-                file->file_flush();
+                RicCoreThread::ScopedLock l(device_lock); // get device lock to call flush
+                try{
+                    file->file_flush(); // on sd cards this will take the most time
+                } catch(WrappedFile::FlushException& e)
+                {
+                    error = true;
+                    _storeState = STATE::ERROR_FLUSH;
+                }
             }
+
+            if (error)
+            {
+                RicCoreThread::ScopedLock l(device_lock);
+                //close the file and clear the fd from the queues map
+                //first erase queue to prevent more append requests from being appended
+                queues.erase(file_desc);
+                //close file
+                try{
+                    file->_close();
+                }
+                catch(WrappedFile::CloseException& e)
+                {
+                   _storeState = STATE::ERROR_CLOSE;
+                }
+            } 
+
         }
         //update semaphore that work is done
         has_work = false;
@@ -121,7 +186,10 @@ void StoreBase::release_fd(store_fd file_desc,bool force) {
     }
     thread_lock.acquire();
     
-    if (!force){
+    // we want to be able to force clear the queue if the state is not nominal otherwise
+    // we will have a deadlock as the flush task does not process anyhting on the queue when
+    //the state is not nominal
+    if (!force || _storeState == STATE::NOMINAL){
         while (!queues.at(file_desc).empty()) 
         {
             thread_lock.release();

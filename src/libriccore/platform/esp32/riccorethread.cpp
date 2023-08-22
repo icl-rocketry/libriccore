@@ -1,16 +1,17 @@
 #include <libriccore/threading/riccorethread.h>
 #include "riccorethread_types.h"
 
+#include <string>
+#include <memory>
+#include <functional>
+
+#include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 #include <freertos/projdefs.h>
 
-#include <esp_pthread.h>
+// #include <esp_pthread.h>
 
-#include <string>
-#include <chrono>
-#include <mutex>
-#include <memory>
-#include <functional>
+
 
 
 RicCoreThread::Thread::Thread(std::function<void(void*)> f_ptr, void* args,const size_t stack_size,const int priority,const CORE_ID coreID, std::string_view name) 
@@ -22,23 +23,38 @@ RicCoreThread::Thread::Thread(std::function<void(void*)> f_ptr, void* args,const
 
     BaseType_t result;
 
-    //construct lambda wrapper to include deleter at the return of f_ptr
-    std::function<void(void *)> wrapped_f_ptr = [f_ptr](void *args){
-                                                        f_ptr(args);
-                                                        vTaskDelete(nullptr); //deletes the current running task
-                                                    };
+    struct TaskArgs
+    {
+        std::function<void(void*)> taskCode;
+        void* args;
+    };
 
+    TaskArgs* wrapped_f_args = new TaskArgs{f_ptr,args};
+    //construct lambda wrapper to include deleter at the return of f_ptr
+    auto wrapped_f_ptr = [](void *args){
+                                            if (args != nullptr)
+                                            {
+                                                //copy task args to scoped variable
+                                                TaskArgs taskArgs = *reinterpret_cast<TaskArgs*>(args); 
+                                                //delete args as we have copied to scoped local variable
+                                                delete reinterpret_cast<TaskArgs*>(args);
+                                                taskArgs.taskCode(taskArgs.args);
+                                            }
+                                            vTaskDelete(nullptr); //deletes the current running task
+                                            };
+    
     if (coreID == CORE_ID::ANYCORE)
     {
-        result = xTaskCreatePinnedToCore(wrapped_f_ptr, name.substr(), stack_size, args, priority, handle, tskNO_AFFINITY);
+        result = xTaskCreatePinnedToCore(wrapped_f_ptr, std::string(name).c_str(), stack_size, wrapped_f_args, priority, &handle, tskNO_AFFINITY);
     }
     else
     {
-        result = xTaskCreatePinnedToCore(wrapped_f_ptr, name.substr(), stack_size, args, priority, handle, static_cast<BaseType_t>(coreID));
+        result = xTaskCreatePinnedToCore(wrapped_f_ptr, std::string(name).c_str(), stack_size, wrapped_f_args, priority, &handle, static_cast<BaseType_t>(coreID));
     }
 
     if (result != pdPASS)
     {
+        delete wrapped_f_args;
         throw std::runtime_error("Thread failed to start with error code:" + std::to_string(static_cast<int>(result)));
     }
 }
@@ -47,10 +63,12 @@ RicCoreThread::Thread::Thread(std::function<void(void*)> f_ptr, void* args,const
 RicCoreThread::Thread::~Thread() {
     join();
     
-    // if ((handle != nullptr) && (eTaskGetState(handle) != eTaskState::eDeleted))
-    // {
-    //     vTaskDelete(handle); // not an equivlanet of thread.join() so need to make one, maybe use task notifications?
-    // }
+    //ensure task handle is deleted
+    if ((handle != nullptr) && (eTaskGetState(handle) != eTaskState::eDeleted))
+    {
+        vTaskDelete(handle);
+    }
+
 }
 
 void RicCoreThread::Thread::join()

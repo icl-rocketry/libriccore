@@ -12,7 +12,7 @@
 class RFile {
 public:
     RFile(std::string path, std::initializer_list<StoreBase&> stores, FILE_MODE mode = FILE_MODE::RW) {
-        for (auto s : stores) {
+        for (auto& s : stores) {
             auto file = s.open(path, mode);
             files.push_back(std::move(file));
         }

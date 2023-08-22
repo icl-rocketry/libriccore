@@ -9,6 +9,7 @@
  * @copyright Copyright (c) 2023
  * 
  */
+#include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h>
 
 class FreeRTOS_Lock

@@ -39,10 +39,13 @@ public:
 
     /**
      * @brief Submit a append reques, throws an std::out_of_range if the file_desc is not in the queues map
+     * Not threadsafe if called in a different thread to get_next_fd or release_fd. Threadsafe when called in a different thread
+     * to flush_task. Can be made fully threadsafe if a second lock is added to prevent modification of the corresponding fd in the map
+     * while append is being called, however on the esp32 this will enver happen as only flush_task is run on a second core.
      * 
      * @param request_ptr 
      */
-    void append(std::unique_ptr<AppendRequest> request_ptr);
+    bool append(std::unique_ptr<AppendRequest> request_ptr);
 
     /**
      * @brief Get the underlying device lock
@@ -65,23 +68,23 @@ public:
     }
 
     /**
-     * @brief Open a new file, returns a wrapped file
+     * @brief Open a new file, returns a wrapped file, returns nullptr on error
      * 
      * @param path 
      * @param mode 
      * @return std::unique_ptr<WrappedFile> 
      */
-    std::unique_ptr<WrappedFile> open(std::string path, FILE_MODE mode = FILE_MODE::RW);
+    std::unique_ptr<WrappedFile> open(std::string_view path, FILE_MODE mode = FILE_MODE::RW);
 
     /**
      * @brief List the current directory, returning a vector of directory_elements
      * 
      * @param path 
      * @param directory_structure Currently a vector of directory_elemets
-     * @return true 
-     * @return false 
+     * @return true success
+     * @return false error
      */
-    bool ls(std::string path, std::vector<directory_element_t> &directory_structure);
+    bool ls(std::string_view path, std::vector<directory_element_t> &directory_structure);
 
     /**
      * @brief Make new directory
@@ -90,7 +93,7 @@ public:
      * @return true 
      * @return false 
      */
-    bool mkdir(std::string path);
+    bool mkdir(std::string_view path);
 
     /**
      * @brief Removes file or directory specified by path
@@ -99,7 +102,7 @@ public:
      * @return true 
      * @return false 
      */
-    bool remove(std::string path);
+    bool remove(std::string_view path);
 
     /**
      * @brief Allocate a new file descriptor and generate an append request channel
@@ -117,6 +120,17 @@ public:
      */
     void release_fd(store_fd file_desc,bool force);
 
+
+    enum class STATE:uint8_t{
+            NOMINAL,
+            ERROR_SETUP,
+            ERROR_CLOSE,
+            ERROR_WRITE,
+            ERROR_FLUSH
+        };
+
+    STATE getState(){return _storeState;};
+
 protected:
     /**
      * @brief This is a reference to another lock in case several devices share a bus
@@ -131,11 +145,16 @@ protected:
      */
     RicCoreThread::Lock_t thread_lock; 
 
+    
+    std::atomic<STATE> _storeState;
+
+    
+
 private:
-    virtual std::unique_ptr<WrappedFile> _open(std::string path, FILE_MODE mode) = 0;
-    virtual bool _ls(std::string path, std::vector<directory_element_t> &directory_structure) = 0;
-    virtual bool _mkdir(std::string path) = 0;
-    virtual bool _remove(std::string path) = 0; // Removes a file or an empty directory
+    virtual std::unique_ptr<WrappedFile> _open(std::string_view path, FILE_MODE mode) = 0;
+    virtual bool _ls(std::string_view path, std::vector<directory_element_t> &directory_structure) = 0;
+    virtual bool _mkdir(std::string_view path) = 0;
+    virtual bool _remove(std::string_view path) = 0; // Removes a file or an empty directory
 
     /**
      * @brief map of queues to flie descriptors
@@ -144,8 +163,9 @@ private:
     std::unordered_map<store_fd, RicCoreThread::UniquePtrChannel<AppendRequest>> queues; 
 
     void flush_task(void* args);
-    RicCoreThread::Thread t;
+    RicCoreThread::Thread flush_thread;
     std::atomic<bool> has_work;
     store_fd file_desc;
     std::atomic<bool> done;
+    
 };
