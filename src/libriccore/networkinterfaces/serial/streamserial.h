@@ -26,6 +26,8 @@
 
 #include "cobs.h"
 
+#include "esp_log.h"
+
 
 
 struct StreamSerialInterfaceInfo : public RnpInterfaceInfo
@@ -50,7 +52,7 @@ public:
         _info.sendBufferSize = 1024;
         _info.receiveBufferSize = 1024;
 
-        _sendBuffer.reserve(200); // reserve average packet size in the send buffer to reduce heapfrag
+        _sendBuffer.reserve(200); // reserve average packet size in the send buffer 
         _receiveBuffer.reserve(200);
     };
 
@@ -67,20 +69,32 @@ public:
      */
     void sendPacket(RnpPacket &data) override
     {
+
         const size_t dataSize = data.header.size() + data.header.packet_len;
+        const size_t encodedSize = COBS::getEncodedBufferSize(dataSize) + 1;// + 1 to account for end marker
+
         if (dataSize > _info.MTU)
         {
-            RicCoreLogging::log<LOGGING_TARGET>("Packet Exceeds Serial MTU");
+            RicCoreLogging::log<LOGGING_TARGET>("Packet Exceeds Serial MTU");//this could cause an infinte loop if the log message length is longer than the mtu!!
             ++_info.txerror;
             return;
         }
-        if (dataSize + _sendBuffer.size() > _info.sendBufferSize)
+
+        if (encodedSize + _sendBuffer.size() > _info.sendBufferSize)
         {
             // not enough space
-            _systemstatus.newFlag(SYSTEM_FLAGS_T::ERROR_SERIAL, "StreamSerial Send Buffer Overflow!");
+            if (!_systemstatus.flagSet(SYSTEM_FLAGS_T::ERROR_SERIAL)){
+                _systemstatus.newFlag(SYSTEM_FLAGS_T::ERROR_SERIAL, "StreamSerial Send Buffer Overflow!");
+            }
             ++_info.txerror;
             return;
         }
+
+        if (_systemstatus.flagSet(SYSTEM_FLAGS_T::ERROR_SERIAL))
+        {
+            _systemstatus.deleteFlag(SYSTEM_FLAGS_T::ERROR_SERIAL);
+        }
+
         std::vector<uint8_t> serializedData;
         data.serialize(serializedData);            // serialize the packet
         COBS::encode(serializedData, _sendBuffer); // encode the serialized data with COBS
@@ -141,9 +155,6 @@ private:
         {
             return;
         }
-        // _serial.write(_sendBuffer.data(),_sendBuffer.size());
-        // _sendBuffer.clear();
-        // const size_t numBytes = _serial.availableForWrite();
 
         const size_t to_send = _sendBuffer.size();
         //this returns the actual number of bytes written
@@ -159,17 +170,13 @@ private:
             _sendBuffer.clear();
         }
 
-        // if (numBytes < _sendBuffer.size())
-        // {
-        //     // _serial.write(_sendBuffer.data(), numBytes);
-        //     _sendBuffer.erase(_sendBuffer.begin(), _sendBuffer.begin() + numBytes); // remove the sent data
-        // }
-        // else if (numBytes >= _sendBuffer.size())
-        // {
-        //     _serial.write(_sendBuffer.data(), _sendBuffer.size());
-        //     _sendBuffer.clear();
-        //     // maybe shrink to fit vector?
-        // }
+        // ESP_LOGI("to send", "%s", std::to_string(to_send).c_str());
+        // ESP_LOGI("num bytes", "%s", std::to_string(numBytes).c_str());
+        // ESP_LOGI("leftover", "%s", std::to_string(leftover).c_str());
+        // ESP_LOGI("heap", "%s", std::to_string(esp_get_free_heap_size()).c_str());
+        // ESP_LOGI("stack", "%s", std::to_string(uxTaskGetStackHighWaterMark(NULL)).c_str());
+        
+
     };
 
     /**
@@ -183,6 +190,7 @@ private:
 
         while (_stream.available() > 0)
         {
+
             uint8_t incomming = _stream.read();
             if (_packetBuffer == nullptr)
             {
@@ -197,8 +205,10 @@ private:
                 _decodedData.resize(numDecoded);
 
                 auto packet_ptr = std::make_unique<RnpPacketSerialized>(_decodedData);
+
                 packet_ptr->header.src_iface = getID();
                 _packetBuffer->push(std::move(packet_ptr));
+
 
                 _receiveBuffer.clear();
                 _info.receiveBufferOverflow = false;
@@ -208,6 +218,7 @@ private:
                 if (_receiveBuffer.size() < _info.receiveBufferSize)
                 {
                     _receiveBuffer.push_back(incomming);
+                    
                 }
                 else
                 {
