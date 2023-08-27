@@ -26,7 +26,7 @@
 
 #include "cobs.h"
 
-#include "esp_log.h"
+
 
 
 
@@ -170,13 +170,6 @@ private:
             _sendBuffer.clear();
         }
 
-        // ESP_LOGI("to send", "%s", std::to_string(to_send).c_str());
-        // ESP_LOGI("num bytes", "%s", std::to_string(numBytes).c_str());
-        // ESP_LOGI("leftover", "%s", std::to_string(leftover).c_str());
-        // ESP_LOGI("heap", "%s", std::to_string(esp_get_free_heap_size()).c_str());
-        // ESP_LOGI("stack", "%s", std::to_string(uxTaskGetStackHighWaterMark(NULL)).c_str());
-        
-
     };
 
     /**
@@ -204,21 +197,29 @@ private:
                 size_t numDecoded = COBS::decode(_receiveBuffer, _decodedData);
                 _decodedData.resize(numDecoded);
 
-                auto packet_ptr = std::make_unique<RnpPacketSerialized>(_decodedData);
+                std::unique_ptr<RnpPacketSerialized> packet_ptr;
 
+
+                try{
+                    packet_ptr = std::make_unique<RnpPacketSerialized>(_decodedData);
+                    
+                }catch (std::exception& e){
+                    RicCoreLogging::log<LOGGING_TARGET>("Deserialization error: " + std::string(e.what()));
+                    _receiveBuffer.clear();
+                    return;
+                }
+                
                 packet_ptr->header.src_iface = getID();
                 _packetBuffer->push(std::move(packet_ptr));
-
-
                 _receiveBuffer.clear();
                 _info.receiveBufferOverflow = false;
+                
             }
             else
             {
                 if (_receiveBuffer.size() < _info.receiveBufferSize)
                 {
                     _receiveBuffer.push_back(incomming);
-                    
                 }
                 else
                 {
