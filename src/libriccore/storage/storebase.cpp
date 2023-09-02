@@ -97,7 +97,10 @@ void StoreBase::flush_task(void* args) {
         thread_lock.acquire(); // locks the queues container
 
         //iterate thru every queue in the queues container for each file, and process any pending writes
-        for (auto& [file_desc, queue] : queues) {
+
+        for (auto iter = queues.begin(); iter != queues.end();){
+            auto& [file_desc, queue] = *iter;
+
             bool pending_flush = false;
             bool error = false;
 
@@ -146,7 +149,7 @@ void StoreBase::flush_task(void* args) {
                 RicCoreThread::ScopedLock l(device_lock);
                 //close the file and clear the fd from the queues map
                 //first erase queue to prevent more append requests from being appended
-                queues.erase(file_desc);
+                iter = queues.erase(iter);
                 //close file
                 try{
                     file->_close();
@@ -155,7 +158,9 @@ void StoreBase::flush_task(void* args) {
                 {
                    _storeState = STATE::ERROR_CLOSE;
                 }
-            } 
+            }else{
+                ++iter;
+            }
 
         }
         //update semaphore that work is done
