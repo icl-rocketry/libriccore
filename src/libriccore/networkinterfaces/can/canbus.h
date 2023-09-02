@@ -71,13 +71,13 @@ public:
     {
         if (twai_driver_install(&can_general_config, &can_timing_config, &can_filter_config) != ESP_OK)
         {
-            _systemstatus.newFlag(SYSTEM_FLAG::ERROR_CAN, "Can iface failed to install!");
+            _systemstatus.newFlag(SYSTEM_FLAGS_T::ERROR_CAN, "Can iface failed to install!");
 
             return;
         }
         if (twai_start() != ESP_OK)
         {
-            _systemstatus.newFlag(SYSTEM_FLAG::ERROR_CAN, "Can Iface failed to start!");
+            _systemstatus.newFlag(SYSTEM_FLAGS_T::ERROR_CAN, "Can Iface failed to start!");
 
             return;
         }
@@ -94,9 +94,9 @@ public:
         if (_sendBuffer.size() + 1 > _info.maxSendBufferElements)
         {
 
-            if (!_systemstatus.flagSet(SYSTEM_FLAG::ERROR_CAN))
+            if (!_systemstatus.flagSet(SYSTEM_FLAGS_T::ERROR_CAN))
             {
-                _systemstatus.newFlag(SYSTEM_FLAG::ERROR_CAN, "Can Send Buffer Overflow!");
+                _systemstatus.newFlag(SYSTEM_FLAGS_T::ERROR_CAN, "Can Send Buffer Overflow!");
             }
             _info.sendBufferOverflow = true;
             return;
@@ -106,9 +106,9 @@ public:
         data.serialize(serializedPacket);
         _sendBuffer.emplace(send_buffer_element_t{RnpCanIdentifier(data.header, generateCanPacketId()), serializedPacket});
 
-        if (_info.sendBufferOverflow && _systemstatus.flagSetOr(SYSTEM_FLAG::ERROR_CAN))
+        if (_info.sendBufferOverflow && _systemstatus.flagSetOr(SYSTEM_FLAGS_T::ERROR_CAN))
         {
-            _systemstatus.deleteFlag(SYSTEM_FLAG::ERROR_CAN, "Can Send Buffer no longer overflowing!");
+            _systemstatus.deleteFlag(SYSTEM_FLAGS_T::ERROR_CAN, "Can Send Buffer no longer overflowing!");
             _info.sendBufferOverflow = false;
         }
     };
@@ -192,9 +192,9 @@ private:
         {
             if (err != ESP_ERR_TIMEOUT)
             {
-                if (!_systemstatus.flagSetOr(SYSTEM_FLAG::ERROR_CAN))
+                if (!_systemstatus.flagSetOr(SYSTEM_FLAGS_T::ERROR_CAN))
                 {
-                    _systemstatus.newFlag(SYSTEM_FLAG::ERROR_CAN, "Can Receive failed with error code" + std::to_string(err));
+                    _systemstatus.newFlag(SYSTEM_FLAGS_T::ERROR_CAN, "Can Receive failed with error code" + std::to_string(err));
                 }
             }
             return;
@@ -235,9 +235,9 @@ private:
             if (_receiveBuffer.size() == _info.maxReceiveBufferElements)
             {
                 _info.receiveBufferOverflow = true;
-                if (!_systemstatus.flagSetOr(SYSTEM_FLAG::ERROR_CAN))
+                if (!_systemstatus.flagSetOr(SYSTEM_FLAGS_T::ERROR_CAN))
                 {
-                    _systemstatus.newFlag(SYSTEM_FLAG::ERROR_CAN, "Can Receive Buffer Overflow" + std::to_string(err));
+                    _systemstatus.newFlag(SYSTEM_FLAGS_T::ERROR_CAN, "Can Receive Buffer Overflow" + std::to_string(err));
                 }
                 return;
             }
@@ -248,9 +248,9 @@ private:
                                                             0,
                                                             millis()});
 
-            if (_info.receiveBufferOverflow && _systemstatus.flagSetOr(SYSTEM_FLAG::ERROR_CAN))
+            if (_info.receiveBufferOverflow && _systemstatus.flagSetOr(SYSTEM_FLAGS_T::ERROR_CAN))
             {
-                _systemstatus.deleteFlag(SYSTEM_FLAG::ERROR_CAN, "Can Receive Buffer no longer overflowing!");
+                _systemstatus.deleteFlag(SYSTEM_FLAGS_T::ERROR_CAN, "Can Receive Buffer no longer overflowing!");
                 _info.receiveBufferOverflow = false;
             }
 
@@ -340,9 +340,9 @@ private:
                 return;
             }
             // proper error might be worth throwing here? -> future
-            if (!_systemstatus.flagSetOr(SYSTEM_FLAG::ERROR_CAN))
+            if (!_systemstatus.flagSetOr(SYSTEM_FLAGS_T::ERROR_CAN))
             {
-                _systemstatus.newFlag(SYSTEM_FLAG::ERROR_CAN, "Can transmit failed with error code" + std::to_string(err));
+                _systemstatus.newFlag(SYSTEM_FLAGS_T::ERROR_CAN, "Can transmit failed with error code" + std::to_string(err));
             }
             return;
         }
