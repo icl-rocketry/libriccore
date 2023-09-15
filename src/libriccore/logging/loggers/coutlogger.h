@@ -50,5 +50,5 @@ public:
     ~CoutLogger(){};
 
 private:
-    const std::string_view logger_name;
+    const std::string logger_name;
 };

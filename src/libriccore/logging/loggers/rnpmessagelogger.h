@@ -24,10 +24,11 @@
 class RnpMessageLogger : public LoggerBase
 {
 public:
-    RnpMessageLogger(const std::string_view name, const uint8_t destination = 1) : 
+    RnpMessageLogger(const std::string_view name, const uint8_t destination = 1, const uint8_t destination_service = 0) : 
                                               LoggerBase(),
                                               logger_name(name),
                                               destinationAddress(destination),
+                                              destinationService(destination_service),
                                               _netman(nullptr)
                                               {};
                                               
@@ -51,12 +52,13 @@ public:
         //well this is awful
         const std::string msg_str = std::string(msg);
 
-        MessagePacket_Base<destinationService,packetType> message(msg_str);
+        MessagePacket_Base<0,packetType> message(msg_str);
         
         //Note this needsto be changed so it makes more sense
         message.header.source_service = 0;
         message.header.source = _netman->getAddress();
         message.header.destination = destinationAddress;
+        message.header.destination_service=destinationService;
         message.header.uid = 0;
 
         _netman->sendPacket(message);
@@ -70,14 +72,20 @@ public:
         log(log_str);
     };
 
+    void changeNetworkTarget(uint8_t destination,uint8_t destination_service)
+    {
+        destinationAddress=destination;
+        destinationService=destination_service;
+    }
+
     ~RnpMessageLogger(){};
 
 private:
-    const std::string_view logger_name;
-    const uint8_t destinationAddress;
+    const std::string logger_name;
+    uint8_t destinationAddress;
+    uint8_t destinationService;
 
     static constexpr int packetType = 100; // defined in the rnp_registered nodes excel
-    static constexpr int destinationService = 0;
 
     /**
      * @brief Pointer to network manager instance

@@ -54,8 +54,8 @@ public:
             .rx_io = static_cast<gpio_num_t>(RxCan),
             .clkout_io = TWAI_IO_UNUSED,
             .bus_off_io = TWAI_IO_UNUSED,
-            .tx_queue_len = 20,
-            .rx_queue_len = 20,
+            .tx_queue_len = 64,
+            .rx_queue_len = 64,
             .alerts_enabled = TWAI_ALERT_NONE,
             .clkout_divider = 0,
         }),
@@ -63,7 +63,7 @@ public:
     can_filter_config(TWAI_FILTER_CONFIG_ACCEPT_ALL())
     {
         _info.MTU = 256; // theoretical maximum is 2048 but this is very chonky
-        _info.maxSendBufferElements = 10;
+        _info.maxSendBufferElements = 10; // maximum of 10 buffered rnp packets equating to a potential maximum of 2.56kb of buffer storage + sizeof(rnpcanidentifer)*10
         _info.maxReceiveBufferElements = 10;
     };
 
@@ -114,6 +114,7 @@ public:
     };
     void update() override
     {
+        
         processSendBuffer();
         processReceivedPackets();
 
@@ -200,7 +201,7 @@ private:
             return;
         }
 
-        if (!(can_packet.flags & TWAI_MSG_FLAG_EXTD))
+        if (!(can_packet.extd))
         {
             RicCoreLogging::log<LOGGING_TARGET>("Bad Can Packet Type, Packet Dumped!");
             return;

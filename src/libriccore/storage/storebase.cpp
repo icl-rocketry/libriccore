@@ -2,6 +2,8 @@
 #include <iostream>
 #include <memory>
 #include <exception>
+#include <cctype>
+#include <string>
 
 #include <libriccore/riccorelogging.h>
 
@@ -206,3 +208,73 @@ void StoreBase::release_fd(store_fd file_desc,bool force) {
     queues.erase(file_desc);
     thread_lock.release();
 }
+
+
+std::string StoreBase::generateUniquePath(std::string_view filepath,std::string_view prefix)
+{
+    std::string uniquePath = std::string(filepath) + "/" + std::string(prefix);
+    std::vector<directory_element_t> fileNames;
+    //ensure directory exists
+    mkdir(filepath);
+
+    if (!ls(filepath,fileNames)){
+        //idk why this would happen but some error has occured so we are reutnring an empty string
+        //maybe throw an excpetion here?
+        throw std::runtime_error("something when wrong when trying to ls, no clue what!");
+    }
+
+    // go away u a big poo
+// rude
+// <3
+    size_t max_index = 0;
+
+
+    for (directory_element_t elem : fileNames) {
+        std::string_view filename = elem.name;
+
+        if (filename.find(prefix) == std::string::npos)
+        {
+            //if filename does not contain the expected prefix, continue in for looop
+            continue;
+        }
+
+        size_t filename_index = 0;
+
+        try{
+            filename_index = getFilepathIndex(filename);
+        }
+        catch (std::runtime_error &e)
+        {
+            //some behaviour if the index is too big - currently just throw
+            throw e;
+
+        }
+
+        if (filename_index > max_index) {
+            max_index = filename_index;
+        }
+
+    }
+    
+    return uniquePath + std::to_string(max_index + 1) ;
+
+    //ls file path
+        //iterate thru ls directory
+        //get highest index
+        //return 1 + 
+}
+
+size_t getFilepathIndex(std::string_view initialString)
+{
+    std::string indexString;
+    for (auto c = initialString.rbegin(); c != initialString.rend(); ++c)
+    {
+        if (!std::isdigit(*c))
+        {
+            break;
+        }
+        indexString.insert(0,std::string{*c});
+    }
+    //throws out of range when stol is too large
+    return indexString.length() ? stol(indexString) : 0;
+};

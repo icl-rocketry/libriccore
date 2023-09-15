@@ -96,6 +96,15 @@ public:
     bool mkdir(std::string_view path);
 
     /**
+     * @brief Finds the lowest numbered instance of the given file prefix and generates a unique
+     * filepath by incrementing the integer at the end of the path_prefix. 
+     * 
+     * @param path_prefix 
+     * @return std::string 
+     */
+    std::string generateUniquePath(std::string_view filepath,std::string_view prefix="");
+    
+    /**
      * @brief Removes file or directory specified by path
      * 
      * @param path 
@@ -148,6 +157,15 @@ protected:
     
     std::atomic<STATE> _storeState;
 
+
+    /**
+     * @brief Returns the suffix integer of the given filepath. Throws out of range if the number is too large
+     * 
+     * @param intialString 
+     * @return size_t 
+     */
+    size_t getFilepathIndex(std::string_view intialString);
+
     
 
 private:
@@ -157,7 +175,7 @@ private:
     virtual bool _remove(std::string_view path) = 0; // Removes a file or an empty directory
 
     /**
-     * @brief map of queues to flie descriptors
+     * @brief map of queues to file descriptors
      * 
      */
     std::unordered_map<store_fd, RicCoreThread::UniquePtrChannel<AppendRequest>> queues; 
@@ -167,5 +185,7 @@ private:
     std::atomic<bool> has_work;
     store_fd file_desc;
     std::atomic<bool> done;
+
+
     
 };
