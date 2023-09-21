@@ -220,6 +220,7 @@ std::string StoreBase::generateUniquePath(std::string_view filepath,std::string_
     if (!ls(filepath,fileNames)){
         //idk why this would happen but some error has occured so we are reutnring an empty string
         //maybe throw an excpetion here?
+
         throw std::runtime_error("something when wrong when trying to ls, no clue what!");
     }
 
@@ -264,7 +265,7 @@ std::string StoreBase::generateUniquePath(std::string_view filepath,std::string_
         //return 1 + 
 }
 
-size_t getFilepathIndex(std::string_view initialString)
+size_t StoreBase::getFilepathIndex(std::string_view initialString)
 {
     std::string indexString;
     for (auto c = initialString.rbegin(); c != initialString.rend(); ++c)
