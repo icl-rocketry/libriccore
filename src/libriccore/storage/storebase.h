@@ -116,9 +116,10 @@ public:
     /**
      * @brief Allocate a new file descriptor and generate an append request channel
      * 
+     * @param maxQueueSize maximum number of append requests to be queued for given file descriptor default is 5
      * @return store_fd 
      */
-    store_fd get_next_fd();
+    store_fd get_next_fd(size_t maxQueueSize = 10);
 
     /**
      * @brief Release the file descriptor, this function blocks until all writes are complete

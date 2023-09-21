@@ -26,9 +26,9 @@ namespace RicCoreThread
         /**
          * @brief Construct a new Unique Ptr Channel object.
          *
-         * @param maxSize Maximum size of queue, -1 for no max size.
+         * @param maxSize Maximum size of queue, 0 for no max size.
          */
-        UniquePtrChannel(size_t maxSize = -1) : _maxSize(maxSize){};
+        UniquePtrChannel(size_t maxSize = 0) : _maxSize(maxSize){};
 
         /**
          * @brief Add new element to queue, throws runtime_error if maxSize exceeded
@@ -38,9 +38,13 @@ namespace RicCoreThread
         void send(std::unique_ptr<T> item)
         {
             auto l = ScopedLock(lock);
-            if (vec.size() == _maxSize)
-            {
-                throw std::runtime_error("Queue Maxsize exceeded!");
+
+            //if max size is greater than zero
+            if (_maxSize){
+                if (vec.size() == _maxSize)
+                {
+                    throw std::runtime_error("Queue Maxsize exceeded!");
+                }
             }
             vec.push(std::move(item));
         }
