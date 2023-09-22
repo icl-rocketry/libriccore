@@ -74,7 +74,7 @@ public:
      * @param mode 
      * @return std::unique_ptr<WrappedFile> 
      */
-    std::unique_ptr<WrappedFile> open(std::string_view path, FILE_MODE mode = FILE_MODE::RW);
+    std::unique_ptr<WrappedFile> open(std::string_view path, FILE_MODE mode = FILE_MODE::RW,size_t maxQueueSize = 10);
 
     /**
      * @brief List the current directory, returning a vector of directory_elements
@@ -170,7 +170,7 @@ protected:
     
 
 private:
-    virtual std::unique_ptr<WrappedFile> _open(std::string_view path, FILE_MODE mode) = 0;
+    virtual std::unique_ptr<WrappedFile> _open(std::string_view path, FILE_MODE mode,size_t maxQueueSize) = 0;
     virtual bool _ls(std::string_view path, std::vector<directory_element_t> &directory_structure) = 0;
     virtual bool _mkdir(std::string_view path) = 0;
     virtual bool _remove(std::string_view path) = 0; // Removes a file or an empty directory

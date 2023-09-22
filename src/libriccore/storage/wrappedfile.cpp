@@ -6,9 +6,9 @@
 
 #include <memory>
 
-WrappedFile::WrappedFile(StoreBase &store, FILE_MODE mode) : 
+WrappedFile::WrappedFile(StoreBase &store, FILE_MODE mode,size_t maxQueueSize) : 
 mode(mode), 
-store(store), file_desc(store.get_next_fd()),
+store(store), file_desc(store.get_next_fd(maxQueueSize)),
 _closed(false)
 {}
 

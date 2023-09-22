@@ -31,7 +31,7 @@ namespace RicCoreThread
         UniquePtrChannel(size_t maxSize = 0) : _maxSize(maxSize){};
 
         /**
-         * @brief Add new element to queue, throws runtime_error if maxSize exceeded
+         * @brief Add new element to queue, dumps item if max size exceeded
          *
          * @param item
          */
@@ -43,7 +43,7 @@ namespace RicCoreThread
             if (_maxSize){
                 if (vec.size() == _maxSize)
                 {
-                    throw std::runtime_error("Queue Maxsize exceeded!");
+                    return;
                 }
             }
             vec.push(std::move(item));
