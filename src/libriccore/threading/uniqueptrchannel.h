@@ -72,6 +72,12 @@ namespace RicCoreThread
             return vec.empty();
         }
 
+        void clear()
+        {
+            auto l = ScopedLock(lock);
+            vec = {};
+        }
+
         size_t size()
         {
             auto l = ScopedLock(lock);
