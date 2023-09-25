@@ -189,6 +189,7 @@ private:
             {
                 continue; // avoid processing overhead of COBS if we cant store the packet anywhere so read out the packet
             }
+            
 
             if (incomming == COBS::marker) // marks the start and end of packet
             {

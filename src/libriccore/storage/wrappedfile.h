@@ -28,7 +28,7 @@ class StoreBase;
 class WrappedFile
 {
 public:
-    WrappedFile(StoreBase &store,FILE_MODE mode = FILE_MODE::RW);
+    WrappedFile(StoreBase &store,FILE_MODE mode = FILE_MODE::RW, size_t maxQueueSize = 10);
 
 
     /**

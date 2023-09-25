@@ -32,13 +32,13 @@ StoreBase::~StoreBase()
     // need to 'wait' for thread to die here with a join like method
 }
 
-std::unique_ptr<WrappedFile> StoreBase::open(std::string_view path, FILE_MODE mode) {
+std::unique_ptr<WrappedFile> StoreBase::open(std::string_view path, FILE_MODE mode, size_t maxQueueSize) {
     if (_storeState != STATE::NOMINAL)
     {
         return nullptr;
     }
     RicCoreThread::ScopedLock sl(device_lock);
-    return _open(path, mode);
+    return _open(path, mode, maxQueueSize);
 }
 
 bool StoreBase::ls(std::string_view path, std::vector<directory_element_t> &directory_structure) {
@@ -174,7 +174,7 @@ void StoreBase::flush_task(void* args) {
     }
 }
 
-store_fd StoreBase::get_next_fd() {
+store_fd StoreBase::get_next_fd(size_t maxQueueSize) {
     //generate new file descriptor, increment desc as system lifetime is unlikely going to exceed the number of files allocated
     store_fd desc = file_desc++;
 
@@ -182,7 +182,7 @@ store_fd StoreBase::get_next_fd() {
     //consturct append channel in the queues container
     queues.emplace(std::piecewise_construct,
                     std::forward_as_tuple(desc),
-                    std::forward_as_tuple());
+                    std::forward_as_tuple(maxQueueSize));
     return desc;
 }
 
