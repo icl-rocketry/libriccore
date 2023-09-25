@@ -6,9 +6,10 @@
 
 #include <memory>
 
-WrappedFile::WrappedFile(StoreBase &store, FILE_MODE mode,size_t maxQueueSize) : 
+WrappedFile::WrappedFile(StoreBase &store, store_fd fileDesc, FILE_MODE mode,size_t maxQueueSize) : 
 mode(mode), 
-store(store), file_desc(store.get_next_fd(maxQueueSize)),
+store(store), 
+file_desc(fileDesc),
 _closed(false)
 {}
 
@@ -19,7 +20,7 @@ WrappedFile::~WrappedFile()
 };
 
 void WrappedFile::append(std::vector<uint8_t>& data) {
-    if (mode == FILE_MODE::READ){
+    if (static_cast<uint16_t>(mode) & static_cast<uint16_t>(FILE_MODE::READ)){
         throw std::runtime_error("Cannot write to readonly file!");
     } 
     if (_closed)
@@ -37,7 +38,7 @@ void WrappedFile::appendCopy(const std::vector<uint8_t> &data)
 }
 
 void WrappedFile::read(std::vector<uint8_t>& dest) {
-    if (mode == FILE_MODE::WRITE) {
+    if (static_cast<uint16_t>(mode) & static_cast<uint16_t>(FILE_MODE::WRITE)) {
         throw std::runtime_error("Cannot read from a writeonly file!");
     }
     if (_closed)

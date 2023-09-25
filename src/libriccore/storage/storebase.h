@@ -170,7 +170,7 @@ protected:
     
 
 private:
-    virtual std::unique_ptr<WrappedFile> _open(std::string_view path, FILE_MODE mode,size_t maxQueueSize) = 0;
+    virtual std::unique_ptr<WrappedFile> _open(std::string_view path,store_fd fileDesc, FILE_MODE mode,size_t maxQueueSize) = 0;
     virtual bool _ls(std::string_view path, std::vector<directory_element_t> &directory_structure) = 0;
     virtual bool _mkdir(std::string_view path) = 0;
     virtual bool _remove(std::string_view path) = 0; // Removes a file or an empty directory

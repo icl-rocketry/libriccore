@@ -37,8 +37,11 @@ std::unique_ptr<WrappedFile> StoreBase::open(std::string_view path, FILE_MODE mo
     {
         return nullptr;
     }
+    //need to ensure sequential locking i.e thread lock first, then dev lock otherwise we have a deadlock with the flush task
+    //so we generate the next file descriptior first, then go get the file from the underlying storage
+    store_fd fileDesc = get_next_fd();
     RicCoreThread::ScopedLock sl(device_lock);
-    return _open(path, mode, maxQueueSize);
+    return _open(path, fileDesc, mode, maxQueueSize);
 }
 
 bool StoreBase::ls(std::string_view path, std::vector<directory_element_t> &directory_structure) {

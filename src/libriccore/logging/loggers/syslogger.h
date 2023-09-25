@@ -111,7 +111,7 @@ private:
             return;
         };
         // construct data frame to write to file
-        std::string dataframe_string = std::to_string(millis()) + "," + std::string(msg) + "," + std::to_string(flag) + "," + std::to_string(status) + ",\n";
+        const std::string dataframe_string = std::to_string(millis()) + "," + std::string(msg) + "," + std::to_string(flag) + "," + std::to_string(status) + ",\n";
 
         std::vector<uint8_t> dataframe_bytes(dataframe_string.begin(), dataframe_string.end());
 
