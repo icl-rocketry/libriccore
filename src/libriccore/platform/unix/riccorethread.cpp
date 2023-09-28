@@ -8,7 +8,8 @@
  * @copyright Copyright (c) 2023
  *
  */
-#include <libriccore/platform/riccorethread.h>
+#include <libriccore/threading/riccorethread.h>
+#include "riccorethread_types.h"
 
 #include <thread>
 #include <chrono>
@@ -31,46 +32,21 @@ RicCoreThread::Thread::Thread(std::function<void(void *)> f_ptr, void *args, con
 
 RicCoreThread::Thread::~Thread()
 {
+    join();
+}
+
+void RicCoreThread::Thread::join()
+{
     handle.join();
 }
 
-RicCoreThread::Lock::Lock() {}
-
-void RicCoreThread::Lock::acquire()
-{
-    lock.lock();
-}
-
-void RicCoreThread::Lock::release()
-{
-    lock.unlock();
-}
 
 void RicCoreThread::delay(uint32_t ms)
 {
     std::this_thread::sleep_for(std::chrono::milliseconds(ms));
 }
 
-void RicCoreThread::ThreadWorkSemaphore::up()
+void RicCoreThread::block()
 {
-    counter = true;
-}
-
-void RicCoreThread::ThreadWorkSemaphore::waitForWork()
-{
-    while (!counter)
-    {
-        std::this_thread::yield(); // Do something else;
-    }
-}
-
-void RicCoreThread::ThreadWorkSemaphore::down()
-{
-
-    counter = false;
-}
-
-bool RicCoreThread::ThreadWorkSemaphore::get()
-{
-    return counter.load();
+    std::this_thread::yield();
 }

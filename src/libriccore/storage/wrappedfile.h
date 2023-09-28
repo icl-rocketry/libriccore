@@ -17,6 +17,8 @@
 #include <cstdint>
 #include <memory>
 #include <unordered_map>
+#include <atomic>
+#include <exception>
 
 #include "storetypes.h"
 
@@ -26,11 +28,11 @@ class StoreBase;
 class WrappedFile
 {
 public:
-    WrappedFile(StoreBase &store,FILE_MODE mode = FILE_MODE::RW);
+    WrappedFile(StoreBase &store,store_fd fileDesc, FILE_MODE mode = FILE_MODE::RW, size_t maxQueueSize = 10);
 
 
     /**
-     * @brief Send a request to the underlying store to store this
+     * @brief Send a request to the underlying store to store this. Throws WrappedFileCLosedException if file is already closed
      * 
      * @param data data to write to file, this will invalidate the provided vector 
      */
@@ -38,21 +40,21 @@ public:
 
     /**
      * @brief Sends a request to unerlying store to store this, however preserves the provided std vector by
-     * copying this data out. 
+     * copying this data out.  Throws WrappedFileCLosedException if file is already closed
      * 
      * @param data const reference to vector
      */
     void appendCopy(const std::vector<uint8_t> &data);
 
     /**
-     * @brief Threadsafe read to destination
+     * @brief Threadsafe read to destination.  Throws WrappedFileCLosedException if file is already closed
      * 
      * @param dest 
      */
     void read(std::vector<uint8_t> &dest);
 
     /**
-     * @brief Automatically called in destructor
+     * @brief Close current file, file must be re-opened from store base
      * 
      * @param force force closes file by erasing append queue, potential data loss
      */
@@ -63,16 +65,50 @@ public:
 protected:
     FILE_MODE mode;
     StoreBase &store;
-
+    
     const store_fd file_desc;
 
 private:
+    
+    /**
+     * @brief Read underlying file, throws WrappedFileReadException on error
+     * 
+     * @param dest 
+     */
     virtual void _read(std::vector<uint8_t> &dest) = 0;
-    virtual void _close() = 0;
 
-    // Write/Flush to the underlying file type
+    /**
+     * @brief Underlying Close file, throws WrappedFileCloseException on error
+     * 
+     */
+    virtual void _close(){_closed = true;};
+
+    /**
+     * @brief Write to underlying file, throws WrappedFileWriteException on any error
+     * 
+     * @param data 
+     */
     virtual void file_write(const std::vector<uint8_t> &data) = 0;
+    
+    /**
+     * @brief Force flush, throws WrappedFileFlushException on any error
+     * 
+     */
     virtual void file_flush() = 0;
 
     friend StoreBase;
+
+    std::atomic<bool> _closed;
+
+    public:
+
+        class WriteException : public std::exception{};
+
+        class FlushException : public std::exception{};
+
+        class ReadException : public std::exception{};
+
+        class CloseException : public std::exception{};
+
 };
+

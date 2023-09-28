@@ -17,4 +17,3 @@ target_link_libraries(libriccore INTERFACE platform)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/libriccore/storage)
 target_link_libraries(libriccore INTERFACE storage)
-
