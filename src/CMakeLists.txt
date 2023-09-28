@@ -1,14 +1,19 @@
 cmake_minimum_required(VERSION 3.16.0)
 
-project(source)
+add_library(libriccore INTERFACE)
 
-message(STATUS "Compiling to run locally")
+if (LOCAL)
+    target_compile_options(libriccore INTERFACE -Wall)
+    target_compile_options(libriccore INTERFACE -Wpedantic)
+    target_compile_features(libriccore INTERFACE cxx_std_17)
+endif()
 
-file(GLOB SRC "*/*.*")
-add_library(source ${SRC})
+target_include_directories(libriccore INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 
-target_compile_features(source PRIVATE cxx_std_17)
+# set_target_properties(libriccore PROPERTIES LINKER_LANGUAGE CXX)
 
-target_include_directories(source PRIVATE *)
-target_include_directories(source PRIVATE ../include/)
-target_include_directories(source PRIVATE ../include/impl/unix/)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/libriccore/platform)
+target_link_libraries(libriccore INTERFACE platform)
+
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/libriccore/storage)
+target_link_libraries(libriccore INTERFACE storage)

@@ -1,17 +1,20 @@
 cmake_minimum_required(VERSION 3.16.0)
 
-project(libriccore)
+if (ESP_PLATFORM)
+    set(LOCAL OFF)
+    idf_component_register(INCLUDE_DIRS src
+                           REQUIRES librnp
+                           SRC_DIRS src/libriccore/platform src/libriccore/platform/esp32 src/libriccore/storage)
+    #link any ESP-IDF required libraries here
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/src/)
 
-add_compile_options(-g)
+    target_link_libraries(${COMPONENT_LIB} INTERFACE libriccore)
+    return()
+else()
+    option(LOCAL "Pick the ESP32 or DESKTOP (default)" ON)
+endif()
 
-add_subdirectory(include)
-add_subdirectory(src)
+project("libriccore" VERSION 1.0)
 
-add_executable(libriccore test/main.cpp)
-target_compile_features(libriccore PRIVATE cxx_std_17)
-
-target_link_libraries(libriccore hal source)
-
-target_include_directories(libriccore PRIVATE src/)
-target_include_directories(libriccore PRIVATE include/)
-target_include_directories(libriccore PRIVATE include/impl/unix/)
+#include src
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/src/)
