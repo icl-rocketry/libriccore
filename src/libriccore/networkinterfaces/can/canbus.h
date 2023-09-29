@@ -82,6 +82,7 @@ public:
             return;
         }
         RicCoreLogging::log<LOGGING_TARGET>("Can started!");
+        twai_reconfigure_alerts(TWAI_ALERT_BUS_OFF, NULL);
     };
 
     void sendPacket(RnpPacket &data) override
@@ -112,8 +113,25 @@ public:
             _info.sendBufferOverflow = false;
         }
     };
+
+    uint32_t _twaialerts;
+    bool _recoverycalled = false;
     void update() override
     {
+        twai_read_alerts(&_twaialerts,0);
+        if(_twaialerts & TWAI_ALERT_BUS_OFF && !_recoverycalled){
+            twai_reconfigure_alerts(TWAI_ALERT_BUS_RECOVERED, NULL);
+            twai_initiate_recovery();
+            RicCoreLogging::log<LOGGING_TARGET>("Can bus recovery initiated!");
+            _recoverycalled = true;
+        }
+
+        if(_twaialerts & TWAI_ALERT_BUS_RECOVERED){
+            twai_reconfigure_alerts(TWAI_ALERT_BUS_OFF, NULL);
+            RicCoreLogging::log<LOGGING_TARGET>("Can bus recovery complete, starting interface!");
+            twai_start();
+            _recoverycalled = false;
+        }
         
         processSendBuffer();
         processReceivedPackets();
