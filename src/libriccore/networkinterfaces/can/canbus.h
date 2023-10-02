@@ -296,7 +296,7 @@ private:
             {
                 auto packet_ptr = std::make_unique<RnpPacketSerialized>(receive_buffer_element.bytedata);
                 packet_ptr->header.src_iface = getID();        // update source interface id
-                _packetBuffer->emplace(std::move(packet_ptr)); // push to network manager packet buffer
+                _packetBuffer->push(std::move(packet_ptr)); // push to network manager packet buffer
                 // cleanup receive buffer
                 _receiveBuffer.erase(can_packet_uid);
                 return;
