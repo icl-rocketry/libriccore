@@ -36,7 +36,7 @@ class RicCoreSystem{
                       Stream &usbDebugPort):
         systemstatus(),
         loggerhandler(ILoggerHandler::getInstance()),
-        networkmanager(254,NODETYPE::LEAF,true), //cant remember what happens if u intialize with address zero
+        networkmanager(254,NODETYPE::LEAF,true,200), //cant remember what happens if u intialize with address zero
         usb0(usbDebugPort,systemstatus,static_cast<uint8_t>(DEFAULT_INTERFACES::USBSERIAL),"usb0"),
         commandhandler(*(static_cast<DERIVED*>(this)),commandmap,static_cast<uint8_t>(DEFAULT_SERVICES::COMMAND),defaultEnabledCommands),
         statemachine()
