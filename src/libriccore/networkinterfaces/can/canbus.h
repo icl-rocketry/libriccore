@@ -82,6 +82,7 @@ public:
             return;
         }
         RicCoreLogging::log<LOGGING_TARGET>("Can started!");
+        twai_reconfigure_alerts(TWAI_ALERT_BUS_OFF, NULL);
     };
 
     void sendPacket(RnpPacket &data) override
@@ -112,11 +113,17 @@ public:
             _info.sendBufferOverflow = false;
         }
     };
+    uint32_t prevOutputTime = 0;
+    
     void update() override
     {
-        
-        processSendBuffer();
-        processReceivedPackets();
+        busRecovery();
+
+        for (uint8_t i = 0; i < 7; i++)
+        {
+            processSendBuffer();
+            processReceivedPackets();
+        }
 
         if (millis() - prevTime > cleanup_delta)
         {
@@ -140,7 +147,7 @@ private:
 
     // CAN DRIVER CONFIG //
     const twai_general_config_t can_general_config;
-    const twai_timing_config_t can_timing_config;
+    const twai_timing_config_t can_timing_config;\
     const twai_filter_config_t can_filter_config;
     // CAN DRIVER CONFIG //
 
@@ -184,6 +191,50 @@ private:
      *
      */
     std::unordered_map<uint32_t, receive_buffer_element_t> _receiveBuffer;
+
+    bool _recoverycalled = false;
+    uint32_t _recoverystarttime = 0;
+
+    void busRecovery(){
+        uint32_t _twaialerts;
+        twai_read_alerts(&_twaialerts, 0);
+        if (_twaialerts & TWAI_ALERT_BUS_OFF && !_recoverycalled)
+        {
+            twai_reconfigure_alerts(TWAI_ALERT_BUS_RECOVERED, NULL);
+            twai_initiate_recovery();
+            _recoverystarttime = millis();
+            RicCoreLogging::log<LOGGING_TARGET>("Can bus recovery initiated!");
+            _recoverycalled = true;
+        }
+
+        if (_twaialerts & TWAI_ALERT_BUS_RECOVERED)
+        {
+            twai_reconfigure_alerts(TWAI_ALERT_BUS_OFF, NULL);
+            RicCoreLogging::log<LOGGING_TARGET>("Can bus recovery complete, starting interface!");
+            twai_start();
+            _recoverycalled = false;
+        }
+
+        if (millis() - _recoverystarttime > 50 && _recoverycalled)
+        {
+            twai_status_info_t _twaistatusstruct;
+            twai_get_status_info(&_twaistatusstruct);
+            if (_twaistatusstruct.state == TWAI_STATE_RECOVERING)
+            {
+                twai_driver_uninstall();
+                RicCoreLogging::log<LOGGING_TARGET>("Can bus recovery took too long, attempting driver reinstall!");
+                if(twai_driver_install(&can_general_config, &can_timing_config, &can_filter_config) != ESP_OK){
+                    RicCoreLogging::log<LOGGING_TARGET>("Can driver reinstall failed!");
+                    return;
+                }
+                if (twai_start() != ESP_OK){
+                    RicCoreLogging::log<LOGGING_TARGET>("Can driver failed to start after reinstall!");
+                    return;
+                }
+                _recoverycalled = false;
+            }
+        }
+    }
 
     void processReceivedPackets()
     {
