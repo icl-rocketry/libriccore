@@ -1,4 +1,4 @@
-# Install script for directory: /Users/kiran/Documents/Projects/ICLR/Ricardo-OS-Template/components/libriccore/src
+# Install script for directory: /Users/kiran/Documents/Projects/ICLR/libriccore/src
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -39,11 +39,11 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/Users/kiran/Documents/Projects/ICLR/Ricardo-OS-Template/components/libriccore/build/src/libriccore/platform/cmake_install.cmake")
+  include("/Users/kiran/Documents/Projects/ICLR/libriccore/build/src/libriccore/platform/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/Users/kiran/Documents/Projects/ICLR/Ricardo-OS-Template/components/libriccore/build/src/libriccore/storage/cmake_install.cmake")
+  include("/Users/kiran/Documents/Projects/ICLR/libriccore/build/src/libriccore/storage/cmake_install.cmake")
 endif()
 
