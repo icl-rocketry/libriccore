@@ -44,25 +44,24 @@ template <typename SYSTEM_FLAGS_T, RicCoreLoggingConfig::LOGGERS LOGGING_TARGET 
 class CanBus : public RnpInterface
 {
 public:
-    CanBus(SystemStatus<SYSTEM_FLAGS_T> &systemstatus, const uint8_t TxCan, const uint8_t RxCan, uint8_t id, std::string name = "Can0") : 
-    RnpInterface(id, name),
-    _systemstatus(systemstatus),
-    can_general_config(
-        {
-            .mode = TWAI_MODE_NORMAL,
-            .tx_io = static_cast<gpio_num_t>(TxCan),
-            .rx_io = static_cast<gpio_num_t>(RxCan),
-            .clkout_io = TWAI_IO_UNUSED,
-            .bus_off_io = TWAI_IO_UNUSED,
-            .tx_queue_len = 64,
-            .rx_queue_len = 64,
-            .alerts_enabled = TWAI_ALERT_NONE,
-            .clkout_divider = 0,
-        }),
-    can_timing_config(TWAI_TIMING_CONFIG_1MBITS()),
-    can_filter_config(TWAI_FILTER_CONFIG_ACCEPT_ALL())
+    CanBus(SystemStatus<SYSTEM_FLAGS_T> &systemstatus, const uint8_t TxCan, const uint8_t RxCan, uint8_t id, std::string name = "Can0") : RnpInterface(id, name),
+                                                                                                                                          _systemstatus(systemstatus),
+                                                                                                                                          can_general_config(
+                                                                                                                                              {
+                                                                                                                                                  .mode = TWAI_MODE_NORMAL,
+                                                                                                                                                  .tx_io = static_cast<gpio_num_t>(TxCan),
+                                                                                                                                                  .rx_io = static_cast<gpio_num_t>(RxCan),
+                                                                                                                                                  .clkout_io = TWAI_IO_UNUSED,
+                                                                                                                                                  .bus_off_io = TWAI_IO_UNUSED,
+                                                                                                                                                  .tx_queue_len = 64,
+                                                                                                                                                  .rx_queue_len = 64,
+                                                                                                                                                  .alerts_enabled = TWAI_ALERT_NONE,
+                                                                                                                                                  .clkout_divider = 0,
+                                                                                                                                              }),
+                                                                                                                                          can_timing_config(TWAI_TIMING_CONFIG_1MBITS()),
+                                                                                                                                          can_filter_config(TWAI_FILTER_CONFIG_ACCEPT_ALL())
     {
-        _info.MTU = 256; // theoretical maximum is 2048 but this is very chonky
+        _info.MTU = 256;                  // theoretical maximum is 2048 but this is very chonky
         _info.maxSendBufferElements = 10; // maximum of 10 buffered rnp packets equating to a potential maximum of 2.56kb of buffer storage + sizeof(rnpcanidentifer)*10
         _info.maxReceiveBufferElements = 10;
     };
@@ -114,7 +113,7 @@ public:
         }
     };
     uint32_t prevOutputTime = 0;
-    
+
     void update() override
     {
         busRecovery();
@@ -147,7 +146,7 @@ private:
 
     // CAN DRIVER CONFIG //
     const twai_general_config_t can_general_config;
-    const twai_timing_config_t can_timing_config;\
+    const twai_timing_config_t can_timing_config;
     const twai_filter_config_t can_filter_config;
     // CAN DRIVER CONFIG //
 
@@ -192,46 +191,24 @@ private:
      */
     std::unordered_map<uint32_t, receive_buffer_element_t> _receiveBuffer;
 
-    bool _recoverycalled = false;
-    uint32_t _recoverystarttime = 0;
-
-    void busRecovery(){
+    void busRecovery()
+    {
         uint32_t _twaialerts;
         twai_read_alerts(&_twaialerts, 0);
-        if (_twaialerts & TWAI_ALERT_BUS_OFF && !_recoverycalled)
+        if (_twaialerts & TWAI_ALERT_BUS_OFF)
         {
-            twai_reconfigure_alerts(TWAI_ALERT_BUS_RECOVERED, NULL);
-            twai_initiate_recovery();
-            _recoverystarttime = millis();
-            RicCoreLogging::log<LOGGING_TARGET>("Can bus recovery initiated!");
-            _recoverycalled = true;
-        }
+            twai_driver_uninstall();
+            RicCoreLogging::log<LOGGING_TARGET>("Can bus off state entered, uninstalling driver!");
 
-        if (_twaialerts & TWAI_ALERT_BUS_RECOVERED)
-        {
-            twai_reconfigure_alerts(TWAI_ALERT_BUS_OFF, NULL);
-            RicCoreLogging::log<LOGGING_TARGET>("Can bus recovery complete, starting interface!");
-            twai_start();
-            _recoverycalled = false;
-        }
-
-        if (millis() - _recoverystarttime > 50 && _recoverycalled)
-        {
-            twai_status_info_t _twaistatusstruct;
-            twai_get_status_info(&_twaistatusstruct);
-            if (_twaistatusstruct.state == TWAI_STATE_RECOVERING)
+            if (twai_driver_install(&can_general_config, &can_timing_config, &can_filter_config) != ESP_OK)
             {
-                twai_driver_uninstall();
-                RicCoreLogging::log<LOGGING_TARGET>("Can bus recovery took too long, attempting driver reinstall!");
-                if(twai_driver_install(&can_general_config, &can_timing_config, &can_filter_config) != ESP_OK){
-                    RicCoreLogging::log<LOGGING_TARGET>("Can driver reinstall failed!");
-                    return;
-                }
-                if (twai_start() != ESP_OK){
-                    RicCoreLogging::log<LOGGING_TARGET>("Can driver failed to start after reinstall!");
-                    return;
-                }
-                _recoverycalled = false;
+                RicCoreLogging::log<LOGGING_TARGET>("Can driver reinstall failed!");
+                return;
+            }
+            if (twai_start() != ESP_OK)
+            {
+                RicCoreLogging::log<LOGGING_TARGET>("Can driver failed to start after reinstall!");
+                return;
             }
         }
     }
@@ -346,7 +323,7 @@ private:
             if (receive_buffer_element.bytedata.size() == receive_buffer_element.expected_size)
             {
                 auto packet_ptr = std::make_unique<RnpPacketSerialized>(receive_buffer_element.bytedata);
-                packet_ptr->header.src_iface = getID();        // update source interface id
+                packet_ptr->header.src_iface = getID();     // update source interface id
                 _packetBuffer->push(std::move(packet_ptr)); // push to network manager packet buffer
                 // cleanup receive buffer
                 _receiveBuffer.erase(can_packet_uid);
