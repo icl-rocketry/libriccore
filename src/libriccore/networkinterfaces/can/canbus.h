@@ -191,25 +191,47 @@ private:
      */
     std::unordered_map<uint32_t, receive_buffer_element_t> _receiveBuffer;
 
+    bool _installsuccess = true;
+    bool _startsuccess = true;
+
     void busRecovery()
     {
         uint32_t _twaialerts;
         twai_read_alerts(&_twaialerts, 0);
+
         if (_twaialerts & TWAI_ALERT_BUS_OFF)
         {
             twai_driver_uninstall();
             RicCoreLogging::log<LOGGING_TARGET>("Can bus off state entered, uninstalling driver!");
+            _installsuccess = false;
+        }
 
+        if (!_installsuccess)
+        {
             if (twai_driver_install(&can_general_config, &can_timing_config, &can_filter_config) != ESP_OK)
             {
                 RicCoreLogging::log<LOGGING_TARGET>("Can driver reinstall failed!");
+                _installsuccess = false;
                 return;
             }
+            _installsuccess = true;
+            _startsuccess = false;
+        }
+
+        if (!_startsuccess)
+        {
+
             if (twai_start() != ESP_OK)
             {
                 RicCoreLogging::log<LOGGING_TARGET>("Can driver failed to start after reinstall!");
+                _startsuccess = false;
                 return;
             }
+
+            _startsuccess = true;
+            RicCoreLogging::log<LOGGING_TARGET>("Can driver started after bus recovery!");
+
+            twai_reconfigure_alerts(TWAI_ALERT_BUS_OFF, NULL);              
         }
     }
 
