@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <memory>
 #include <unordered_map>
+#include <queue>
 
 #include "storetypes.h"
 #include "wrappedfile.h"
@@ -184,7 +185,10 @@ private:
     void flush_task(void* args);
     RicCoreThread::Thread flush_thread;
     std::atomic<bool> has_work;
+
     store_fd file_desc;
+    std::queue<store_fd> returned_fileDesc;
+    
     std::atomic<bool> done;
 
 

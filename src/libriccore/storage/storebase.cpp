@@ -178,8 +178,17 @@ void StoreBase::flush_task(void* args) {
 }
 
 store_fd StoreBase::get_next_fd(size_t maxQueueSize) {
-    //generate new file descriptor, increment desc as system lifetime is unlikely going to exceed the number of files allocated
-    store_fd desc = file_desc++;
+    //check if we can use a returned filedesc, otherwise generate a new file desc
+    store_fd desc;
+    
+    if (returned_fileDesc.size())
+    {
+        desc = returned_fileDesc.front();
+        returned_fileDesc.pop();
+    }else
+    {
+        desc = ++file_desc;
+    }
 
     RicCoreThread::ScopedLock sl(thread_lock);
     //consturct append channel in the queues container
@@ -211,6 +220,7 @@ void StoreBase::release_fd(store_fd file_desc,bool force) {
 
     queues.erase(file_desc);
     thread_lock.release();
+    returned_fileDesc.push(file_desc);
 }
 
 
