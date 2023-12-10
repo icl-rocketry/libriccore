@@ -6,7 +6,7 @@
  * @brief Type of file descriptor
  * 
  */
-using store_fd = uint32_t;
+using store_fd = uint8_t;
  
 /**
  * @brief file mode values, copied directly from the sdfat impelmentation for ease,
