@@ -84,7 +84,7 @@ bool StoreBase::append(std::unique_ptr<AppendRequest> request_ptr) {
     
 }
 
-void StoreBase::flush_task(void* args) {
+void StoreBase::flush_task(void* args) { 
     std::unique_ptr<AppendRequest> req;
     WrappedFile* file;
     
@@ -180,7 +180,7 @@ void StoreBase::flush_task(void* args) {
 store_fd StoreBase::get_next_fd(size_t maxQueueSize) {
     //check if we can use a returned filedesc, otherwise generate a new file desc
     store_fd desc;
-    
+
     if (returned_fileDesc.size())
     {
         desc = returned_fileDesc.front();
