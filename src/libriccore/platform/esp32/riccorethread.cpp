@@ -12,7 +12,8 @@
 
 // #include <esp_pthread.h>
 
-
+// TODO: convert this to static task generation 
+//TODO : add thread terminate 
 
 
 RicCoreThread::Thread::Thread(std::function<void(void*)> f_ptr, void* args,const size_t stack_size,const int priority,const CORE_ID coreID, std::string_view name):
