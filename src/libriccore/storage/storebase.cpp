@@ -111,7 +111,7 @@ void StoreBase::flush_task(void* args) {
             file = nullptr; // Make sure we don't accidentally write to the wrong file
             //need to verify that the file still exists using the fd
             
-            while (!queue.empty()) {
+            while (!queue.empty()) { // maybe instead of empty get the current count and process that 
                 
                 //take 'ownership' of the first append request and remove from the queue
                 req = std::move(queue.pop());   
