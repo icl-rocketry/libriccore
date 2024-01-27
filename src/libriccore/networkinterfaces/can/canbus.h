@@ -118,7 +118,7 @@ public:
     {
         busRecovery();
 
-        for (uint8_t i = 0; i < 7; i++)
+        for (uint8_t i = 0; i < 8; i++)
         {
             processSendBuffer();
             processReceivedPackets();
