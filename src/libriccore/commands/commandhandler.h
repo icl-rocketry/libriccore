@@ -201,7 +201,10 @@ private:
         command_t cmd = CommandPacket::getCommand(*packetptr); 
         if (_enabledCommands.test(cmd))
         {
-            _commandMap.at(static_cast<COMMAND_ID_ENUM>(cmd))(_sys, *packetptr);
+            if (_commandMap.count(static_cast<COMMAND_ID_ENUM>(cmd)))
+            {
+                _commandMap.at(static_cast<COMMAND_ID_ENUM>(cmd))(_sys, *packetptr);
+            } // TODO: log illegal command call?
         }
         
     };
