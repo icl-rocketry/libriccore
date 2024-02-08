@@ -96,6 +96,8 @@ void StoreBase::flush_task(void* args) {
         }
 
         if (_storeState != STATE::NOMINAL){
+            // remove has_work flag otherwise we will eat all cpu nom nom
+            has_work = false;
             continue; // skip writing queues if store is not nominal
         }
 
