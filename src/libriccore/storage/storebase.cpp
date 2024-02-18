@@ -18,7 +18,7 @@ StoreBase::StoreBase(RicCoreThread::Lock_t &device_lock) : device_lock(device_lo
                                           flush_thread(
                                             [this](void *arg){this->StoreBase::flush_task(arg);},
                                             reinterpret_cast<void *>(this),
-                                            2000,
+                                            4000,
                                             1,
                                             RicCoreThread::Thread::CORE_ID::CORE0,
                                             "flushtask"),
@@ -96,6 +96,9 @@ void StoreBase::flush_task(void* args) {
         }
 
         if (_storeState != STATE::NOMINAL){
+            // remove has_work flag otherwise we will eat all cpu nom nom
+            has_work = false;
+            RicCoreThread::block();
             continue; // skip writing queues if store is not nominal
         }
 
@@ -125,6 +128,7 @@ void StoreBase::flush_task(void* args) {
                         file->file_write(req->data);
                     } catch (WrappedFile::WriteException& e)
                     {
+                        RicCoreLogging::log<RicCoreLoggingConfig::LOGGERS::SYS>("Write error");
                         error = true;
                         _storeState = STATE::ERROR_WRITE;
                         break;
@@ -143,8 +147,10 @@ void StoreBase::flush_task(void* args) {
                     file->file_flush(); // on sd cards this will take the most time
                 } catch(WrappedFile::FlushException& e)
                 {
+                    RicCoreLogging::log<RicCoreLoggingConfig::LOGGERS::SYS>("Flush error");
                     error = true;
                     _storeState = STATE::ERROR_FLUSH;
+
                 }
             }
 
@@ -158,6 +164,7 @@ void StoreBase::flush_task(void* args) {
                 }
                 catch(WrappedFile::CloseException& e)
                 {
+                    RicCoreLogging::log<RicCoreLoggingConfig::LOGGERS::SYS>("File close error");
                    _storeState = STATE::ERROR_CLOSE;
                 }
 
@@ -173,6 +180,7 @@ void StoreBase::flush_task(void* args) {
         has_work = false;
         //release store thread lock
         thread_lock.release();
+        RicCoreThread::block();
         if (done) break;
     }
 }

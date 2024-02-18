@@ -118,7 +118,7 @@ public:
     {
         busRecovery();
 
-        for (uint8_t i = 0; i < 7; i++)
+        for (uint8_t i = 0; i < 8; i++)
         {
             processSendBuffer();
             processReceivedPackets();
@@ -359,6 +359,8 @@ private:
         }
     };
 
+    bool _txerror = false;
+
     void processSendBuffer()
     {
         if (_sendBuffer.empty())
@@ -386,9 +388,14 @@ private:
             if (err == ESP_ERR_TIMEOUT || err == ESP_FAIL)
             {
                 // can tx buffer full, dont increment seg_id and try to place on buffer next update
-
-                RicCoreLogging::log<LOGGING_TARGET>("Can tx buffer full");
+                if(!_txerror){
+                    RicCoreLogging::log<LOGGING_TARGET>("Can tx buffer full");
+                    _txerror = true;
+                }
                 return;
+            }
+            else{
+                _txerror = false;
             }
             // proper error might be worth throwing here? -> future
             if (!_systemstatus.flagSetOr(SYSTEM_FLAGS_T::ERROR_CAN))
