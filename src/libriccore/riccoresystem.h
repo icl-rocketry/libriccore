@@ -51,6 +51,7 @@ class RicCoreSystem{
         void coreSystemSetup(){
             networkManagerSetup();
             static_cast<DERIVED*>(this)->systemSetup();
+            RicCoreLogging::log<RicCoreLoggingConfig::LOGGERS::SYS>("System Setup Complete");
         };
         
         /**
