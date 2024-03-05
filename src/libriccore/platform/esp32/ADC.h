@@ -99,4 +99,13 @@ int16_t ADC::getADC(adc_unit_t _unit, adc_channel_t channel){
     }
 }
 
+<<<<<<< Updated upstream
+=======
+int16_t getADC2(){
+
+    return adc2_channel;
+
+}
+
+>>>>>>> Stashed changes
 };
