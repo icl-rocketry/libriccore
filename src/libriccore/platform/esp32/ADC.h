@@ -15,6 +15,7 @@
 #include <driver/gpio.h>
 #include <esp-adc-hal.h>
 #include <libriccore/riccorelogging.h>
+#include <librnp/rnp_networkmanager.h>
 
 
 // ADC reference voltage = 1100mV, however, this can range between 1000mV and 1200mV.
@@ -43,7 +44,7 @@ public:
     _pin(pin)
     {}; 
 
-void ADC::setup(){
+void setup(){
 
     int error = 0;
     int channel = digitalPinToAnalogChannel(_pin);
@@ -75,7 +76,7 @@ void ADC::setup(){
 
 }
 
-void ADC::update(){
+void update(){
 
     if (!_adcInitialized) {
         return;
@@ -89,9 +90,9 @@ void ADC::update(){
     }   
 }
 
-int16_t ADC::getADC(adc_unit_t _unit, adc_channel_t channel){
+int16_t getADC(adc_unit_t _unit, adc_channel_t channel){
 
-    if (_unit == ADC_UNIT_1) {
+    if (_unit == 1) {
         return adc1_raw;
     } 
     else {
