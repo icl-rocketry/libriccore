@@ -7,7 +7,6 @@
  */
 
 
-#include <string>
 #include <stdio.h>
 #include <stdint.h>
 #include <driver/adc.h>
@@ -24,8 +23,8 @@ class ADC {
 
 private:
 
-    //
-    const std::string _name;
+    
+    
     static constexpr auto LOG_TARGET = RicCoreLoggingConfig::LOGGERS::SYS;  
     static const adc_unit_t _unit;
     static constexpr adc_atten_t atten = ADC_ATTEN_DB_11;
@@ -39,9 +38,8 @@ private:
     uint16_t adc2_raw;
 
 public:
-    ADC(std::string_view ADC_name const uint8_t pin):
-    _name(ADC_name),
-    _pin(pin)
+    ADC(const uint8_t pin):
+        _pin(pin)
     {}; 
 
 void setup(){
@@ -100,13 +98,4 @@ int16_t getADC(adc_unit_t _unit, adc_channel_t channel){
     }
 }
 
-<<<<<<< Updated upstream
-=======
-int16_t getADC2(){
-
-    return adc2_channel;
-
-}
-
->>>>>>> Stashed changes
 };

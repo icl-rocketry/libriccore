@@ -1,35 +1,20 @@
 #pragma once
 
-#include <std.int>
+#include <stdint.h>
 #include <driver/pcnt.h>
 #include <librnp/rnp_networkmanager.h>
-#include <string>
 
 class PCNT{
 
-private:
-    const std::string _name;
-    static constexpr auto LOG_TARGET = RicCoreLoggingConfig::LOGGERS::SYS;
-    static const pcnt_unit_t _unit
-    int16_t count;
-    const uint8_t _gpioSig;
-    const uint8_t _channel;
-
 public:
 
-PCNT(std::string_view PCNT_Name, uint8_t channel, uint8_t gpioSig):
-_name(PCNT_Name),
-_channel(channel),
-_gpioSig(gpioSig)
+PCNT(pcnt_unit_t _unit, pcnt_channel_t _channel, uint8_t _gpioSig):
+_unit(_unit),
+_channel(_channel),
+_gpioSig(_gpioSig)
 {};
 
 void setup(){
-
-        if (_channel > SOC_PCNT_CHANNELS_PER_UNIT ){
-            pcnt_new_unit();
-            
-        }
-    
         /* Prepare configuration for the PCNT unit */
         pcnt_config_t pcnt_config = {
             // Set PCNT input signal and control GPIOs
@@ -47,13 +32,6 @@ void setup(){
 
         /* Initialize PCNT unit */
         pcnt_unit_config(&pcnt_config);
-        if(error){
-            RicCoreLogging:log<LOG_TARGET>("PCNT Initialisation error");
-            return;
-        }
-        else {
-            RicCoreLogging::log<LOG_TARGET>("PCNT Initialised")
-        }
 
         // Resetting count (PCNT bug)
         pcnt_counter_pause(_unit);
@@ -65,17 +43,21 @@ void setup(){
 void update(){
 
     pcnt_get_counter_value(_unit, &count);
-    if (err != ESP_OK){
-        RicCoreLogging::log<LOG_TARGET>("PCNT update failed");
-        return;
-    }
-
-    count = err;
 
 }
 esp_err_t getCount(){
 
     return count;
 }
+
+ pcnt_unit_t _unit;
+ pcnt_channel_t _channel;
+ uint8_t _gpioSig;
+
+private:
+
+    int16_t count;
+   
+    
 
 };
