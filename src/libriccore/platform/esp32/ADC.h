@@ -7,45 +7,26 @@
  */
 
 
-#include <stdio.h>
 #include <stdint.h>
 #include <driver/adc.h>
 #include <esp_adc_cal.h>
-#include <driver/gpio.h>
-#include <esp-adc-hal.h>
-#include <libriccore/riccorelogging.h>
-#include <librnp/rnp_networkmanager.h>
 
 
 // ADC reference voltage = 1100mV, however, this can range between 1000mV and 1200mV.
 
 class ADC {
 
-private:
-
-    
-    
-    static constexpr auto LOG_TARGET = RicCoreLoggingConfig::LOGGERS::SYS;  
-    static const adc_unit_t _unit;
-    static constexpr adc_atten_t atten = ADC_ATTEN_DB_11;
-    esp_adc_cal_characteristics_t _adcCal;
-    static constexpr adc_bits_width_t width;
-    static constexpr adc_atten_t _atten = ADC_ATTEN_DB_11;
-    const uint8_t _pin;
-    bool _adcInitialized = false;
-    static constexpr int VREF = 1100;
-    uint16_t adc1_raw;
-    uint16_t adc2_raw;
-
 public:
+
     ADC(const uint8_t pin):
         _pin(pin)
     {}; 
 
 void setup(){
 
-    int error = 0;
+    esp_err_t error;
     int channel = digitalPinToAnalogChannel(_pin);
+
     //Configure ADC channel
     if (channel > (SOC_ADC_MAX_CHANNEL_NUM - 1)) 
     {
@@ -62,15 +43,8 @@ void setup(){
         error += adc1_config_channel_atten(static_cast<adc_channel_t>(_channel), _atten);
     }
 
-    if (error) 
-    {
-        RicCoreLogging::log<RicCoreLoggingConfig::LOGGERS::SYS>("ADC setup failed");
-        return;
-    }
-
     esp_adc_cal_characterize(_unit, _atten, width, VREF, &_adcCal);
     _adcInitialized = true;
-    RicCoreLogging::log<RicCoreLoggingConfig::LOGGERS::SYS>("ADC setup complete");
 
 }
 
@@ -84,7 +58,7 @@ void update(){
          adc1_raw = adc1_get_raw(adc1_channel_t channel);
     } 
     else {
-    adc2_raw = adc2_get_raw(adc2_channel_t channel, adc_bits_width_t width,&adc2_raw);
+    adc2_raw = adc2_get_raw(adc2_channel_t channel, adc_bits_width_t width, &adc2_raw);
     }   
 }
 
@@ -97,5 +71,19 @@ int16_t getADC(adc_unit_t _unit, adc_channel_t channel){
         return adc2_raw;
     }
 }
+
+private:
+  
+    static const adc_unit_t _unit;
+    static constexpr adc_atten_t atten = ADC_ATTEN_DB_11;
+    esp_adc_cal_characteristics_t _adcCal;
+    static constexpr adc_bits_width_t width = ADC_WIDTH_BIT_12;
+    static constexpr adc_atten_t _atten = ADC_ATTEN_DB_11;
+    const uint8_t _pin;
+    bool _adcInitialized = false;
+    static constexpr int VREF = 1100;
+    uint16_t adc1_raw;
+    uint16_t adc2_raw;
+
 
 };

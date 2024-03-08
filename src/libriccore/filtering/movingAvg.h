@@ -1,45 +1,48 @@
 #pragma once
 #include <stdint.h>
 
-class movingAvg{
+class MovingAvg{
 
 public:
 
-movingAvg(int numSamples, int samples):
-    numSamples(numSamples),
-    samples(samples)
-    {};
+MovingAvg(uint8_t numSamples):
+_numSamples(numSamples)
+{};
+
 
 void update(float data){
-    MovingAvgSamples.push_back(data);
+    _MovingAvgSamples.push_back(data);
 
-    if (MovingAvgSamples.size() > numSamples)
+            if (_MovingAvgSamples.size() > _numSamples)
             {
-                MovingAvgSamples.pop_front();   
+                _MovingAvgSamples.pop_front();   
             }
+
             float MovingAverageSum = 0.0;
-            for (float sample: MovingAvgSamples)
+            
+            for (float sample: _MovingAvgSamples)
             {
                 MovingAverageSum += sample;
             }
 
-            avg = MovingAverageSum*sampleCoeff;
+            _avg = MovingAverageSum*_sampleCoeff;
 }
 
-float getAvg(float data, int numSamples, int samples){
+float getAvg(){
 
-    return avg;
+    return _avg;
 
 }
+
+uint8_t _numSamples;
+std::deque<float> _MovingAvgSamples;
+float _data;
+float _sampleCoeff = 1.0/_numSamples;
+float _avg;
 
 private:
 
-    int numSamples;
-    int samples;
-    float data;
-    std::deque<float> MovingAvgSamples;
-    float sampleCoeff = 1.0/numSamples;
-    float avg;
+    
 
 
 };

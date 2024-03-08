@@ -1,8 +1,14 @@
 #pragma once
 
+/**
+ * @file PCNT.h
+ * @author Soham More
+ * @brief PCNT wrapper for ESP32
+ * @date 2024
+ */
+
 #include <stdint.h>
 #include <driver/pcnt.h>
-#include <librnp/rnp_networkmanager.h>
 
 class PCNT{
 
