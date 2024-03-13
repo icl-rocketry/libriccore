@@ -9,6 +9,7 @@
 #include <stdint.h>
 #include <driver/adc.h>
 #include <esp_adc_cal.h>
+#include <esp32-hal-gpio.h>
 
 // ADC reference voltage = 1100mV, however, this can range between 1000mV and 1200mV.
 
@@ -16,15 +17,15 @@ class ADC
 {
 
 public:
-    ADC(const uint8_t pin, adc_channel_t channel) : _pin(pin),
-                                                    channel(channel){};
+    ADC(const uint8_t pin) : _pin(pin)
+                                {};
 
     void setup()
     {
 
         // Configure ADC channel
 
-        digitalPinToAnalogChannel(_pin);
+        int8_t channel = digitalPinToAnalogChannel(_pin);
         _channel = static_cast<adc1_channel_t>(channel);
 
         adc1_config_width(width);
