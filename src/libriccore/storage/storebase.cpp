@@ -18,7 +18,7 @@ StoreBase::StoreBase(RicCoreThread::Lock_t &device_lock) : device_lock(device_lo
                                           flush_thread(
                                             [this](void *arg){this->StoreBase::flush_task(arg);},
                                             reinterpret_cast<void *>(this),
-                                            2000,
+                                            10000,
                                             1,
                                             RicCoreThread::Thread::CORE_ID::CORE0,
                                             "flushtask"),
