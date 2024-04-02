@@ -26,7 +26,7 @@ void setup(){
             // Set PCNT input signal and control GPIOs
             .pulse_gpio_num = _gpioSig,
             .ctrl_gpio_num = PCNT_PIN_NOT_USED,
-            .pos_mode = PCNT_CHANNEL_EDGE_ACTION_HOLD, // Count up on the positive edge
+            .pos_mode = PCNT_CHANNEL_EDGE_ACTION_INCREASE, // Count up on the positive edge
             .neg_mode = PCNT_CHANNEL_EDGE_ACTION_INCREASE, // Keep the counter value on the negative edge
             .counter_h_lim = 32767,
             .counter_l_lim = 0,
