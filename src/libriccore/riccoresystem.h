@@ -22,6 +22,11 @@
 // #include "platform/HardwareSerial.h"
 #include <iostream>
 
+#if defined(ESP32)
+#include <esp_app_format.h>
+#include <esp_ota_ops.h>
+#endif
+
 template<typename DERIVED,
          typename SYSTEM_FLAGS_T,
          typename COMMAND_ID_ENUM>
@@ -52,6 +57,16 @@ class RicCoreSystem{
             networkManagerSetup();
             static_cast<DERIVED*>(this)->systemSetup();
             RicCoreLogging::log<RicCoreLoggingConfig::LOGGERS::SYS>("System Setup Complete");
+            
+            // Logging firmware info
+            std::stringstream info;
+            #ifdef ESP32
+                const esp_app_desc_t* appinfo = esp_ota_get_app_description();
+                info << "Name: " << appinfo->project_name << "\n" <<"Version: " << appinfo->version << "\n" << "Compile Date: " << appinfo->date << "\n" << "Compile Time: " << appinfo->time << "\n" << "IDF Ver: " << appinfo->idf_ver;
+            #else
+                info << "No Info!";
+            #endif
+            RicCoreLogging::log<RicCoreLoggingConfig::LOGGERS::SYS>(info.str());
         };
         
         /**
