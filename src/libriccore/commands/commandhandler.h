@@ -209,7 +209,7 @@ private:
             }
         }
         else {
-            RicCoreLogging::log<LOGGING_TARGET>("Illegal command!");
+            RicCoreLogging::log<LOGGING_TARGET>("Illegal command! Source node: " + std::to_string(packetptr->header.source) + ", command id: " + std::to_string(cmd));
         }
         
     };
