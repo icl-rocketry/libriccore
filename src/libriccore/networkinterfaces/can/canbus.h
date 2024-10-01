@@ -426,12 +426,19 @@ private:
     uint32_t prevTime;
     void cleanupReceiveBuffer()
     {
-        for (auto &[key, value] : _receiveBuffer)
+
+        for (auto it = _receiveBuffer.begin(); it != _receiveBuffer.end();)
         {
-            if (millis() - value.last_time_modified > receive_buffer_expiry)
+
+            if (millis() - it->second.last_time_modified > receive_buffer_expiry)
             {
-                _receiveBuffer.erase(key);
+                it = _receiveBuffer.erase(it);
+            }
+            else
+            {
+                ++it;
             }
         }
+
     };
 };
