@@ -18,7 +18,7 @@ StoreBase::StoreBase(RicCoreThread::Lock_t &device_lock) : device_lock(device_lo
                                           flush_thread(
                                             [this](void *arg){this->StoreBase::flush_task(arg);},
                                             reinterpret_cast<void *>(this),
-                                            4000,
+                                            10000,
                                             1,
                                             RicCoreThread::Thread::CORE_ID::CORE0,
                                             "flushtask"),
@@ -84,7 +84,7 @@ bool StoreBase::append(std::unique_ptr<AppendRequest> request_ptr) {
     
 }
 
-void StoreBase::flush_task(void* args) {
+void StoreBase::flush_task(void* args) { 
     std::unique_ptr<AppendRequest> req;
     WrappedFile* file;
     
@@ -114,7 +114,7 @@ void StoreBase::flush_task(void* args) {
             file = nullptr; // Make sure we don't accidentally write to the wrong file
             //need to verify that the file still exists using the fd
             
-            while (!queue.empty()) {
+            while (!queue.empty()) { // maybe instead of empty get the current count and process that 
                 
                 //take 'ownership' of the first append request and remove from the queue
                 req = std::move(queue.pop());   
@@ -188,7 +188,7 @@ void StoreBase::flush_task(void* args) {
 store_fd StoreBase::get_next_fd(size_t maxQueueSize) {
     //check if we can use a returned filedesc, otherwise generate a new file desc
     store_fd desc;
-    
+
     if (returned_fileDesc.size())
     {
         desc = returned_fileDesc.front();

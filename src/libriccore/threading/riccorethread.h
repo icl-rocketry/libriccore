@@ -1,18 +1,18 @@
 #pragma once
 #include <string>
 #include <functional>
+#include <atomic>
 
 #include <libriccore/platform/riccorethread_types.h>
-
 
 namespace RicCoreThread
 {
     /**
      * Thread manages creation and deletion
      * Once a thread object is constructed, it is launched.
-     * When the destructor is called, the thread will also be deleted. 
+     * When the destructor is called, the thread will also be deleted.
      * The Thread class automatically deals with differences in platform, so when running on the freeRTOS platform
-     * on the esp32, the passed function pointer will be internally wrapped in a deleter to delete the task handle when 
+     * on the esp32, the passed function pointer will be internally wrapped in a deleter to delete the task handle when
      * the function returns, so DONT include a deleter or you will get crashes!!!!!
      */
     class Thread
@@ -52,26 +52,26 @@ namespace RicCoreThread
 
         /**
          * @brief Join blocks the caller thread until this thread instance terminates
-         * 
+         *
          */
         void join();
 
     private:
         ThreadHandle_t handle;
-        bool success;
-        
+        bool success; // not sure why this is here? -> need to clarify what exceptions thread construion will throw
+        std::atomic<bool> deleted; //required to check if a freertos task has already been deleted.
     };
 
     /**
      * @brief Thread delay function
-     * 
-     * @param ms 
+     *
+     * @param ms
      */
     void delay(uint32_t ms);
 
     /**
      * @brief Block thread using the appropriate api
-     * 
+     *
      */
     void block();
 

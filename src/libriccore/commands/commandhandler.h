@@ -19,11 +19,13 @@
 #include <librnp/default_packets/simplecommandpacket.h>
 
 #include "libriccore/util/bitsethelpers.h"
+#include <libriccore/riccorelogging.h>
 
 
 template <typename SYSTEM_T,
           typename COMMAND_ID_ENUM,
-          size_t N_MAX_COMMANDS = 256>
+          size_t N_MAX_COMMANDS = 256,
+          RicCoreLoggingConfig::LOGGERS LOGGING_TARGET = RicCoreLoggingConfig::LOGGERS::SYS>
 class CommandHandler : public RnpNetworkService
 {
     static_assert(std::is_enum_v<COMMAND_ID_ENUM>, "COMMAND_ID_ENUM template paramter not an enum!");
@@ -201,8 +203,15 @@ private:
         command_t cmd = CommandPacket::getCommand(*packetptr); 
         if (_enabledCommands.test(cmd))
         {
-            _commandMap.at(static_cast<COMMAND_ID_ENUM>(cmd))(_sys, *packetptr);
+            if (_commandMap.count(static_cast<COMMAND_ID_ENUM>(cmd)))
+            {
+                _commandMap.at(static_cast<COMMAND_ID_ENUM>(cmd))(_sys, *packetptr);
+            }
         }
+        else {
+            RicCoreLogging::log<LOGGING_TARGET>("Illegal command! Source node: " + std::to_string(packetptr->header.source) + ", command id: " + std::to_string(cmd));
+        }
+        
     };
 
     /**

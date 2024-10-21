@@ -29,9 +29,9 @@ public:
         _channel = static_cast<adc1_channel_t>(channel);
 
         adc1_config_width(width);
-        adc1_config_channel_atten(_channel, _atten);
+        adc1_config_channel_atten(_channel, m_atten);
 
-        esp_adc_cal_characterize(_unit, _atten, width, VREF, &_adcCal);
+        esp_adc_cal_characterize(_unit, m_atten, width, VREF, &_adcCal);
         _adcInitialized = true;
     }
 
@@ -48,20 +48,19 @@ public:
 
     int16_t getADC()
     {
-
         return adc1_raw;
     }
 
+    void setAttenuation(adc_atten_t attenuation){m_atten = attenuation;};
     const uint8_t _pin;
     adc_channel_t channel;
     adc1_channel_t _channel;
 
 private:
     adc_unit_t _unit = ADC_UNIT_1;
-    static constexpr adc_atten_t atten = ADC_ATTEN_DB_11;
     esp_adc_cal_characteristics_t _adcCal;
     static constexpr adc_bits_width_t width = ADC_WIDTH_BIT_12;
-    static constexpr adc_atten_t _atten = ADC_ATTEN_DB_11;
+    adc_atten_t m_atten = ADC_ATTEN_DB_11;
     bool _adcInitialized = false;
     static constexpr int VREF = 1100;
     uint16_t adc1_raw;
