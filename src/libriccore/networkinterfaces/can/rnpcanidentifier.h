@@ -17,6 +17,9 @@ struct RnpCanIdentifier
     uint8_t destination;
     /**
      * @brief  Can physial layer packet id NOT the rnp packet id. only 5 bits!
+     * !Note this is not the same as the can_packet_uid. This id is only unique between 
+     * ! each source and destination pair. For a unique identifier bus wide, the can_packet_uid 
+     * ! is required!
      * 
      * 
      */
@@ -34,11 +37,11 @@ struct RnpCanIdentifier
                                                 can_packet_id(can_packet_id),
                                                 seg_id(0)
                                                 {};
-
-    RnpCanIdentifier(uint32_t can_id) : source(can_id & 0xFF),
-                                        destination((can_id >> 8) & 0xFF),
-                                        can_packet_id((can_id >> 16) & 0x1F),
-                                        seg_id((can_id >> 21) & 0xFF)
+  
+    RnpCanIdentifier(uint32_t can_id) : source((can_id >> 21) & 0xFF), // can_ID is MSB
+                                        destination((can_id >> 13) & 0xFF),
+                                        can_packet_id((can_id >> 8) & 0x1F),
+                                        seg_id(can_id & 0xFF)
                                         {};
 
     /**
@@ -46,12 +49,12 @@ struct RnpCanIdentifier
      * 
      * @return uint32_t 
      */
-    uint32_t getIdentifier() const {return source | (destination << 8) | ((can_packet_id & 0x1F) << 16) | (seg_id << 21);};
+    uint32_t getIdentifier() const {return (source << 21) | (destination << 13) | ((can_packet_id & 0x1F) << 8) | (seg_id);};
     /**
      * @brief Extracts the unique packet identifer from the can identifier i.e ignores the segmentation part of the id.
      * 
      * @param can_id 
      * @return uint32_t 
      */
-    static uint32_t getCanPacketUID(uint32_t can_id){return can_id & 0x1FFFFF;};
+    static uint32_t getCanPacketUID(uint32_t can_id){return can_id & 0xFFFFFF00;};
 };
