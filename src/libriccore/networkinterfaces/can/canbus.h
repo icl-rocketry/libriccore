@@ -134,7 +134,7 @@ public:
 
     /**
      * @brief Set the Hardware Acceptance Filter. Will uninstall and reinstall can driver
-     * NOT IMPLEMENTED YET!
+     *! NOT IMPLEMENTED YET!
      * @param mask
      */
     void setAcceptanceFilter(uint32_t mask){};
