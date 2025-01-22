@@ -24,7 +24,8 @@
 
 #if defined(ESP32)
 #include <esp_app_format.h>
-#include <esp_ota_ops.h>
+// #include <esp_ota_ops.h>
+#include <esp_app_desc.h>
 #endif
 
 template<typename DERIVED,
@@ -58,15 +59,26 @@ class RicCoreSystem{
             static_cast<DERIVED*>(this)->systemSetup();
             RicCoreLogging::log<RicCoreLoggingConfig::LOGGERS::SYS>("System Setup Complete");
             
-            // Logging firmware info
+            // Boot message info string
             std::stringstream info;
+
+            //Firmware version, compile date and time, idf version
             #ifdef ESP32
-                const esp_app_desc_t* appinfo = esp_ota_get_app_description();
-                info << "Name: " << appinfo->project_name << "\n" <<"Version: " << appinfo->version << "\n" << "Compile Date: " << appinfo->date << "\n" << "Compile Time: " << appinfo->time << "\n" << "IDF Ver: " << appinfo->idf_ver;
+                const esp_app_desc_t* appinfo = esp_app_get_description();
+                info << "Name: "         << appinfo->project_name << "\n"
+                     << "Version: "      << appinfo->version      << "\n"
+                     << "Compile Date: " << appinfo->date         << "\n" 
+                     << "Compile Time: " << appinfo->time         << "\n"
+                     << "IDF Ver: "      << appinfo->idf_ver      << "\n";
             #else
                 info << "No Info!";
             #endif
+
+            //network address
+            info << "Network Address: " << networkmanager.getAddress() << "\n";
+        
             RicCoreLogging::log<RicCoreLoggingConfig::LOGGERS::SYS>(info.str());
+        
         };
         
         /**

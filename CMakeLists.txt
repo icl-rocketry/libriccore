@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.16.0)
 if (ESP_PLATFORM)
     set(LOCAL OFF)
     idf_component_register(INCLUDE_DIRS src
-                           REQUIRES librnp
+                           REQUIRES librnp esp_app_format
                            SRC_DIRS src/libriccore/platform src/libriccore/platform/esp32 src/libriccore/storage)
     #link any ESP-IDF required libraries here
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/src/)
