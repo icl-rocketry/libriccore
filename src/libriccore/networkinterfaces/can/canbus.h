@@ -30,6 +30,7 @@
 #include <libriccore/systemstatus/systemstatus.h>
 
 #include "rnpcanidentifier.h"
+#include <libriccore/util/millisFast.h>
 
 struct CanBusInterfaceInfo : public RnpInterfaceInfo
 {
@@ -65,7 +66,7 @@ public:
         _info.maxSendBufferElements = 20; // maximum of 10 buffered rnp packets equating to a potential maximum of 2.56kb of buffer storage + sizeof(rnpcanidentifer)*10
         _info.maxReceiveBufferElements = 20;
     };
-
+    
     void setup() override
     {
         if (twai_driver_install(&can_general_config, &can_timing_config, &can_filter_config) != ESP_OK)
@@ -114,8 +115,10 @@ public:
     };
     uint32_t prevOutputTime = 0;
 
+
     void update() override
     {
+        namespace RCU = RicCoreUtil;
         busRecovery();
 
         for (uint8_t i = 0; i < 16; i++)
@@ -124,10 +127,10 @@ public:
             processReceivedPackets();
         }
 
-        if (millis() - prevTime > cleanup_delta)
+        if (RCU::millisFast() - prevTime > cleanup_delta)
         {
             cleanupReceiveBuffer();
-            prevTime = millis();
+            prevTime = RCU::millisFast();
         }
     };
     const RnpInterfaceInfo *getInfo() override { return &_info; };
