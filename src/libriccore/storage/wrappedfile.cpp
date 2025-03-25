@@ -5,6 +5,7 @@
 #include "appendrequest.h"
 
 #include <memory>
+#include <stdexcept>
 
 WrappedFile::WrappedFile(StoreBase &store, store_fd fileDesc, FILE_MODE mode,size_t maxQueueSize) : 
 mode(mode), 

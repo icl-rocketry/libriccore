@@ -1,8 +1,16 @@
 #pragma once
 #include <chrono>
 
-inline uint32_t millis(){
-    auto duration = std::chrono::system_clock::now().time_since_epoch();
-    auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
-    return uint32_t(ms);
-};
+inline thread_local auto programStartTime = std::chrono::steady_clock::now();
+inline thread_local double clockDriftMultiplier = 1.0;
+
+inline void setClockDriftPPM(int ppm) {
+    clockDriftMultiplier = 1.0 + static_cast<double>(ppm) / 1e6;
+	programStartTime = std::chrono::steady_clock::now();
+}
+
+inline uint32_t millis() {
+    auto elapsed = std::chrono::steady_clock::now() - programStartTime;
+    auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count();
+    return static_cast<uint32_t>(static_cast<double>(ms) * clockDriftMultiplier);
+}
