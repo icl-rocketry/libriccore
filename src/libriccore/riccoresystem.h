@@ -75,7 +75,7 @@ class RicCoreSystem{
             #endif
 
             //network address
-            info << "Network Address: " << networkmanager.getAddress() << "\n";
+            info << "Network Address: " << std::to_string(networkmanager.getAddress()) << "\n";
         
             RicCoreLogging::log<RicCoreLoggingConfig::LOGGERS::SYS>(info.str());
         
