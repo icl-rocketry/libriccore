@@ -17,3 +17,6 @@ target_link_libraries(libriccore INTERFACE platform)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/libriccore/storage)
 target_link_libraries(libriccore INTERFACE storage)
+
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/libriccore/drivers ${CMAKE_CURRENT_BINARY_DIR}/libriccore_drivers)
+target_link_libraries(libriccore INTERFACE drivers)

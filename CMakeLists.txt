@@ -4,7 +4,7 @@ if (ESP_PLATFORM)
     set(LOCAL OFF)
     idf_component_register(INCLUDE_DIRS src
                            REQUIRES librnp esp_app_format
-                           SRC_DIRS src/libriccore/platform src/libriccore/platform/esp32 src/libriccore/storage)
+                           SRC_DIRS src/libriccore/platform src/libriccore/platform/esp32 src/libriccore/storage src/libriccore/drivers)
     #link any ESP-IDF required libraries here
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/src/)
     # include_directories(${CMAKE_SOURCE_DIR}/src/Config)
